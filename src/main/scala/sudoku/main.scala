@@ -1,6 +1,8 @@
 package junicamp.sudoku
+
 import Sudoku.*
 import Examples.*
+import Pretty.*
 
 @main
 def main(): Unit = {
