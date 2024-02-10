@@ -1,5 +1,4 @@
-package junicamp
-package sudoku
+package junicamp.sudoku
 
 import Sudoku.*
 
