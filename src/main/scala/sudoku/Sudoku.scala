@@ -2,16 +2,17 @@ package junicamp.sudoku
 import Examples.*
 import junicamp.sudoku.Sudoku.{doublePrettyRow, singlePrettyRow}
 
-type Row = Vector[Option[Int]]
+type Cell = Option[Int]
+type Row = Vector[Cell]
 case class Sudoku(rows: Vector[Row])
 
 object Sudoku {
-  def prettyCell(cell: Option[Int]): String =  cell match {
+  def prettyCell(cell: Cell): String =  cell match {
     case Some(x) => x.toString
     case None => " "
   }
 
-  def prettyString(r:Row): String = List(
+  def prettyRow(r:Row): String = List(
     r
       .take(3)
       .map(prettyCell)
@@ -28,23 +29,23 @@ object Sudoku {
 
   def pretty(sudoku: Sudoku): String = List(
     firstPrettyRow,
-    prettyString(sudoku.rows(0)),
+    prettyRow(sudoku.rows(0)),
     singlePrettyRow,
-    prettyString(sudoku.rows(1)),
+    prettyRow(sudoku.rows(1)),
     singlePrettyRow,
-    prettyString(sudoku.rows(2)),
+    prettyRow(sudoku.rows(2)),
     doublePrettyRow,
-    prettyString(sudoku.rows(3)),
+    prettyRow(sudoku.rows(3)),
     singlePrettyRow,
-    prettyString(sudoku.rows(4)),
+    prettyRow(sudoku.rows(4)),
     singlePrettyRow,
-    prettyString(sudoku.rows(5)),
+    prettyRow(sudoku.rows(5)),
     doublePrettyRow,
-    prettyString(sudoku.rows(6)),
+    prettyRow(sudoku.rows(6)),
     singlePrettyRow,
-    prettyString(sudoku.rows(7)),
+    prettyRow(sudoku.rows(7)),
     singlePrettyRow,
-    prettyString(sudoku.rows(8)),
+    prettyRow(sudoku.rows(8)),
     lastPrettyRow,
   ).mkString("\n")
 
