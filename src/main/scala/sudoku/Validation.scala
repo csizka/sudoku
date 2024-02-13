@@ -58,7 +58,7 @@ object Validation {
   }
 
   def areAllColumnsSolved(sudoku: Sudoku): Boolean = {
-    getAllColumns(sudoku).forall(areCellsSolved) && sudoku.rows.size == 9
+    getAllColumns(sudoku).forall(areCellsSolved)
   }
 
   def getNthBlock(sudoku: Sudoku, n: Int): Block = {
@@ -67,7 +67,7 @@ object Validation {
       val allRows = Vector(row, row + 1, row + 2)
       val column = n % 3 * 3
 
-      allRows.flatMap(x => sudoku.rows(x).drop(column).take(3))
+      allRows.flatMap(x => sudoku.rows(x).slice(column, column + 3))
     }
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
@@ -84,36 +84,6 @@ object Validation {
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
 
-  def blockContainsOnlyValidValues(block: Block): Boolean = block match {
-    case Vector() => true
-    case Some(x) +: rest if (1 to 9).contains(x) => blockContainsOnlyValidValues(rest)
-    case None +: rest => blockContainsOnlyValidValues(rest)
-    case _ => false
-  }
-
-  def isBlockRepetitionFree(block: Block): Boolean = {
-    def isBlockRepetitionFreeHelper(restElems: Block, set: Set[Int]): Boolean = restElems match {
-      case Vector() => true
-      case Some(x) +: rest =>
-        if (set.contains(x)) false
-        else isBlockRepetitionFreeHelper(rest, set + x)
-      case None +: rest => isBlockRepetitionFreeHelper(rest, set)
-    }
-
-    isBlockRepetitionFreeHelper(block, Set.empty[Int])
-  }
-
-
-  def isBlockSolved(block: Block): Boolean = {
-    def validateBlockHelper(restElems: Block, set: Set[Int]): Boolean = restElems match {
-      case Vector() => set == Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
-      case Some(x) +: rest if (1 to 9).contains(x) => validateBlockHelper(rest, set + x)
-      case _ => false
-    }
-
-    validateBlockHelper(block, Set.empty[Int])
-  }
-
   def getAllBlocks(sudoku: Sudoku): Vector[Column] = {
     if (sudoku.rows.nonEmpty) {
       sudoku.rows.indices
@@ -123,22 +93,30 @@ object Validation {
     else Vector.empty[Column]
   }
 
-  def AreAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {
-    getAllBlocks(sudoku).forall(areCellsRepetitionFree) && sudoku.rows.size == 9
+  def areAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {
+    getAllBlocks(sudoku).forall(areCellsRepetitionFree)
   }
 
-  def AreAllBlocksSolved(sudoku: Sudoku): Boolean = {
-    getAllBlocks(sudoku).forall(isBlockSolved) && sudoku.rows.size == 9
+  def areAllBlocksSolved(sudoku: Sudoku): Boolean = {
+    getAllBlocks(sudoku).forall(areCellsSolved)
   }
 
 // All Rows && Columns && Blocks validation
   def isSudokuRepetitionFree(sudoku:Sudoku): Boolean = {
-    AreAllBlocksRepetitionFree(sudoku) &&
+    areAllBlocksRepetitionFree(sudoku) &&
     areAllColumnsRepetitionFree(sudoku) &&
     allRowsRepetitionFree(sudoku)
   }
 
+  def isSudokuValid(sudoku: Sudoku): Boolean = {
+    sudoku.rows.forall(areCellsValid)
+}
 
-
-
+  def isSudokuSolved(sudoku: Sudoku): Boolean = {
+    areAllBlocksRepetitionFree(sudoku) &&
+    areAllColumnsRepetitionFree(sudoku) && 
+    allRowsRepetitionFree(sudoku) &&
+    sudoku.rows.flatten.size == 81 &&
+    sudoku.rows.flatten.map { case Some(x) => x}.toSet == (1 to 9).toSet
+  }
 }
