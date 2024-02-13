@@ -114,9 +114,20 @@ object Validation {
 
   def isSudokuSolved(sudoku: Sudoku): Boolean = {
     areAllBlocksRepetitionFree(sudoku) &&
-    areAllColumnsRepetitionFree(sudoku) && 
+    areAllColumnsRepetitionFree(sudoku) &&
     allRowsRepetitionFree(sudoku) &&
     sudoku.rows.flatten.size == 81 &&
     sudoku.rows.flatten.map { case Some(x) => x}.toSet == (1 to 9).toSet
   }
+
+  def possibleSolutionsForCell(sudoku: Sudoku, rowIndex: Int, columnIndex: Int): Set[Int] = {
+    if ( 0 <= rowIndex && 0 <= columnIndex && columnIndex <= 8 && rowIndex <= 8)
+      (1 to 9).toSet --
+      sudoku.rows(rowIndex).flatten.toSet --
+        getNthColumn(sudoku, columnIndex).flatten.toSet --
+        getNthBlock(sudoku, (rowIndex / 3 * 3) + (columnIndex / 3)).flatten.toSet
+    else throw new IndexOutOfBoundsException(s"Row index $rowIndex || $columnIndex is/ are not valid, please give a number between 0 and 8.")
+  }
+
+
 }

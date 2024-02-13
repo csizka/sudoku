@@ -23,7 +23,10 @@ def main(): Unit = {
   assert(isSudokuValid(goodSudoku))
   assert(isSudokuValid(notGoodSudoku))
   assert(!isSudokuSolved(notGoodSudoku))
-
+  println(pretty(partiallySolvedGoodSudoku))
+  assert(possibleSolutionsForCell(partiallySolvedGoodSudoku, 6,1) == Set(6))
+  assert(possibleSolutionsForCell(partiallySolvedGoodSudoku, 0,5) == Set(2, 8))
+  assert(possibleSolutionsForCell(partiallySolvedGoodSudoku, 3, 8) == Set(2,3))
 
 
 }
