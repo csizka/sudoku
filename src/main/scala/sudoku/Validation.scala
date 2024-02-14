@@ -129,5 +129,17 @@ object Validation {
     else throw new IndexOutOfBoundsException(s"Row index $rowIndex || $columnIndex is/ are not valid, please give a number between 0 and 8.")
   }
 
+  def collectEmptyCellCoords(sudoku: Sudoku): List[(Int, Int)] = {
+    val coords = for {
+        x <- 0 to 8
+        y <- 0 to 8
+    } yield (x, y)
+    coords.filter { case (x,y) => sudoku.rows(x)(y).isEmpty }.toList
+  }
+
+  def listPossibleSudokusByCell(sudoku: Sudoku, row: Int, col: Int): List[Sudoku] = {
+    possibleSolutionsForCell(sudoku, row, col).toList.map(x => sudoku.insert(row, col, x))
+  }
+
 
 }
