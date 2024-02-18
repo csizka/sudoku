@@ -1,8 +1,9 @@
-package junicamp.sudoku
+package junicamp
+package sudoku
 
-import junicamp.sudoku.Examples.*
-import junicamp.sudoku.Pretty.*
-import junicamp.sudoku.Sudoku.*
+import sudoku.Examples.*
+import sudoku.Pretty.*
+import sudoku.Sudoku.*
 
 import scala.annotation.tailrec
 
@@ -36,10 +37,12 @@ object Validation {
     sudoku.rows.forall(areCellsSolved) && sudoku.rows.size == 9
   }
 
+  //noinspection ScalaWeakerAccess
   def allRowsRepetitionFree(sudoku: Sudoku): Boolean = {
     sudoku.rows.forall(areCellsRepetitionFree)
   }
 
+  //noinspection ScalaWeakerAccess
   // Column tests
   def getNthColumn(sudoku: Sudoku, n: Int): Column = {
     if (0<= n && n <= 8)
@@ -47,12 +50,14 @@ object Validation {
     else throw new IndexOutOfBoundsException(s" the index inserted: $n is invalid, please use an index between 0 and 8")
   }
 
+  //noinspection ScalaWeakerAccess
   def getAllColumns(sudoku: Sudoku): Vector[Column] = {
     sudoku.rows.indices
       .map(n => getNthColumn(sudoku, n))
       .toVector
   }
 
+  //noinspection ScalaWeakerAccess
   def areAllColumnsRepetitionFree(sudoku: Sudoku): Boolean = {
     getAllColumns(sudoku).forall(areCellsRepetitionFree)
   }
@@ -61,6 +66,7 @@ object Validation {
     getAllColumns(sudoku).forall(areCellsSolved)
   }
 
+  //noinspection ScalaWeakerAccess
   def getNthBlock(sudoku: Sudoku, n: Int): Block = {
     if (0 <= n && n <= 8) {
       val row = n / 3 * 3
@@ -84,6 +90,7 @@ object Validation {
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
 
+  //noinspection ScalaWeakerAccess
   def getAllBlocks(sudoku: Sudoku): Vector[Column] = {
     if (sudoku.rows.nonEmpty) {
       sudoku.rows.indices
@@ -93,6 +100,7 @@ object Validation {
     else Vector.empty[Column]
   }
 
+  //noinspection ScalaWeakerAccess
   def areAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {
     getAllBlocks(sudoku).forall(areCellsRepetitionFree)
   }
@@ -117,18 +125,28 @@ object Validation {
     areAllColumnsRepetitionFree(sudoku) &&
     allRowsRepetitionFree(sudoku) &&
     sudoku.rows.flatten.size == 81 &&
-    sudoku.rows.flatten.map { case Some(x) => x}.toSet == (1 to 9).toSet
+    numOfEmptyCells(sudoku) == 0 &&
+    sudoku.rows.flatten.map {
+      case Some(x) => x
+      case None => 0
+    }.toSet == (1 to 9).toSet
+
   }
 
   def possibleSolutionsForCell(sudoku: Sudoku, rowIndex: Int, columnIndex: Int): Set[Int] = {
-    if ( 0 <= rowIndex && 0 <= columnIndex && columnIndex <= 8 && rowIndex <= 8)
+    if (0 <= rowIndex && 0 <= columnIndex && columnIndex <= 8 && rowIndex <= 8)
       (1 to 9).toSet --
       sudoku.rows(rowIndex).flatten.toSet --
-        getNthColumn(sudoku, columnIndex).flatten.toSet --
-        getNthBlock(sudoku, (rowIndex / 3 * 3) + (columnIndex / 3)).flatten.toSet
+      getNthColumn(sudoku, columnIndex).flatten.toSet --
+      getNthBlock(sudoku, (rowIndex / 3 * 3) + (columnIndex / 3)).flatten.toSet
     else throw new IndexOutOfBoundsException(s"Row index $rowIndex || $columnIndex is/ are not valid, please give a number between 0 and 8.")
   }
 
+  //noinspection ScalaWeakerAccess
+  def numOfPossibleSolutionsForCell(sudoku: Sudoku, rowIndex: Int, columnIndex: Int): Int =
+    possibleSolutionsForCell(sudoku, rowIndex, columnIndex).size
+
+  //noinspection ScalaWeakerAccess
   def collectEmptyCellCoords(sudoku: Sudoku): List[(Int, Int)] = {
     val coords = for {
         x <- 0 to 8
@@ -137,9 +155,53 @@ object Validation {
     coords.filter { case (x,y) => sudoku.rows(x)(y).isEmpty }.toList
   }
 
-  def listPossibleSudokusByCell(sudoku: Sudoku, row: Int, col: Int): List[Sudoku] = {
+  def sumOfPossibleSolutionsForAllCells(sudoku: Sudoku): Int = {
+    val coords = collectEmptyCellCoords(sudoku)
+    coords.foldLeft(0) { case (accCur: Int, (x, y)) => accCur + numOfPossibleSolutionsForCell(sudoku, x, y) }
+  }
+  def sumOfPossibleSolutionsForAllCellsV2(sudoku: Sudoku): Int = {
+    val coords = for {
+      x <- 0 to 8
+      y <- 0 to 8
+    } yield (x, y)
+    coords.foldLeft(0) { case (accCur: Int, (x, y)) => accCur + numOfPossibleSolutionsForCell(sudoku, x, y) }
+  }
+
+  def numOfEmptyCells(sudoku: Sudoku): Int =
+    collectEmptyCellCoords(sudoku).size
+
+  //noinspection ScalaWeakerAccess
+  def calcNextSteps(sudoku: Sudoku, row: Int, col: Int): List[Sudoku] = {
     possibleSolutionsForCell(sudoku, row, col).toList.map(x => sudoku.insert(row, col, x))
   }
 
+  //noinspection ScalaWeakerAccess
+  def nonZeroPossibilityCells(sudoku: Sudoku): IndexedSeq[ (Int, Int)] = {
+    val coords = for {
+      x <- 0 to 8
+      y <- 0 to 8
+    } yield (x, y)
+    coords
+      .filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) != 0 }
+  }
 
+  //noinspection ScalaWeakerAccess
+  def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = {
+    if (lstOfSudoku.nonEmpty) {
+      val lstSorted = lstOfSudoku.sortBy(x => numOfEmptyCells(x))
+      val sudokuToWorkOn = lstSorted.head
+      val newLst = lstSorted.drop(1)
+      if (nonZeroPossibilityCells(sudokuToWorkOn).nonEmpty)
+        val cellToFill = nonZeroPossibilityCells(sudokuToWorkOn).minBy((x, y) => numOfPossibleSolutionsForCell(sudokuToWorkOn, x, y))
+        calcLogicalNextSteps(calcNextSteps(sudokuToWorkOn, cellToFill._1, cellToFill._2) ++ newLst)
+      else if (isSudokuSolved(sudokuToWorkOn))
+          List(sudokuToWorkOn)
+      else calcLogicalNextSteps(newLst)
+    } else throw new IllegalArgumentException("the Sudoku is unsolvable")
+  }
+  def finishSudoku(sudoku: Sudoku): Sudoku = {
+    if (isSudokuValid(sudoku) && isSudokuRepetitionFree(sudoku))
+      calcLogicalNextSteps(List(sudoku)).head
+    else throw new Exception("the Sudoku is unsolvable")
+  }
 }
