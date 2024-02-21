@@ -176,27 +176,40 @@ object Validation {
   }
 
   //noinspection ScalaWeakerAccess
-  def nonZeroPossibilityCells(sudoku: Sudoku): IndexedSeq[ (Int, Int)] = {
+  def findCellsToFill(sudoku: Sudoku): IndexedSeq[ (Int, Int)] = {
     val coords = for {
       x <- 0 to 8
       y <- 0 to 8
     } yield (x, y)
     coords
-      .filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) != 0 }
+      .filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) > 0 }
   }
 
   //noinspection ScalaWeakerAccess
+  def addSingleChoices(sudoku: Sudoku): Sudoku = {
+    collectEmptyCellCoords(sudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1}
+      .foldLeft(sudoku) { case (accCur: Sudoku, (x, y)) => accCur.insert(x, y, possibleSolutionsForCell(sudoku, x, y).toList.head)}
+  }
+
   def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = {
     if (lstOfSudoku.nonEmpty) {
-      val lstSorted = lstOfSudoku.sortBy(x => numOfEmptyCells(x))
-      val sudokuToWorkOn = lstSorted.head
-      val newLst = lstSorted.drop(1)
-      if (nonZeroPossibilityCells(sudokuToWorkOn).nonEmpty)
-        val cellToFill = nonZeroPossibilityCells(sudokuToWorkOn).minBy((x, y) => numOfPossibleSolutionsForCell(sudokuToWorkOn, x, y))
-        calcLogicalNextSteps(calcNextSteps(sudokuToWorkOn, cellToFill._1, cellToFill._2) ++ newLst)
-      else if (isSudokuSolved(sudokuToWorkOn))
-          List(sudokuToWorkOn)
-      else calcLogicalNextSteps(newLst)
+      val curSudoku = lstOfSudoku.head
+      println(curSudoku)
+      val restSudokus = lstOfSudoku.drop(1)
+      val cellsToFill = collectEmptyCellCoords(curSudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) > 0 }
+      println(cellsToFill)
+      if (cellsToFill.nonEmpty)
+        val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
+        if (singleChoices.nonEmpty)
+          calcLogicalNextSteps(addSingleChoices(curSudoku) +: restSudokus)
+        else {
+          val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
+          println(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2))
+          calcLogicalNextSteps(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus)
+        }
+      else if (isSudokuSolved(curSudoku))
+          List(curSudoku)
+      else calcLogicalNextSteps(restSudokus)
     } else throw new IllegalArgumentException("the Sudoku is unsolvable")
   }
   def finishSudoku(sudoku: Sudoku): Sudoku = {
