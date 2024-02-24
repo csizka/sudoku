@@ -194,17 +194,14 @@ object Validation {
   def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = {
     if (lstOfSudoku.nonEmpty) {
       val curSudoku = lstOfSudoku.head
-      println(curSudoku)
       val restSudokus = lstOfSudoku.drop(1)
       val cellsToFill = collectEmptyCellCoords(curSudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) > 0 }
-      println(cellsToFill)
       if (cellsToFill.nonEmpty)
         val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
         if (singleChoices.nonEmpty)
           calcLogicalNextSteps(addSingleChoices(curSudoku) +: restSudokus)
         else {
           val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
-          println(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2))
           calcLogicalNextSteps(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus)
         }
       else if (isSudokuSolved(curSudoku))
@@ -216,5 +213,27 @@ object Validation {
     if (isSudokuValid(sudoku) && isSudokuRepetitionFree(sudoku))
       calcLogicalNextSteps(List(sudoku)).head
     else throw new Exception("the Sudoku is unsolvable")
+  }
+  def countSolutions(sudoku: Sudoku): Int = {
+    def countSudokuHelper(lstOfSudoku: List[Sudoku], resSet: Set[Sudoku]): Int = {
+      if (lstOfSudoku.nonEmpty) {
+        val curSudoku = lstOfSudoku.head
+        val restSudokus = lstOfSudoku.drop(1)
+        val cellsToFill = collectEmptyCellCoords(curSudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) > 0 }
+        if (cellsToFill.nonEmpty)
+          val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
+          if (singleChoices.nonEmpty)
+            countSudokuHelper(addSingleChoices(curSudoku) +: restSudokus, resSet)
+          else {
+            val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
+            countSudokuHelper(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
+          }
+        else if (isSudokuSolved(curSudoku))
+          println((resSet + curSudoku).size)
+          countSudokuHelper(restSudokus, resSet + curSudoku)
+        else countSudokuHelper(restSudokus, resSet)
+      } else resSet.size
+    }
+    countSudokuHelper(List(sudoku), Set.empty[Sudoku])
   }
 }

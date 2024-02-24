@@ -83,15 +83,31 @@ object Examples {
 
   val testingSudoku = Sudoku(
     Vector(
-      Vector(Some(5), Some(3), Some(4), Some(6), Some(7), None, Some(9), Some(1), Some(2)),
+      Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), None),
       Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
       Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-      Vector(None, Some(5), None, None, Some(6), Some(1), Some(4), None, None),
-      Vector(None, Some(2), None, Some(8), Some(5), Some(3), Some(7), None, Some(1)),
-      Vector(Some(7),None, None, Some(9), Some(2), Some(4), None, None, Some(6)),
+      Vector(None, Some(5), None, None, None, Some(1), None, None, None),
+      Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, Some(1)),
+      Vector(Some(7),None, None, Some(9), None, Some(4), None, None, Some(6)),
       Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-      Vector(2, 8, 7, 4, 1, 9, 6, 3, 5).map(x => Some(x)),
-      Vector(None, None, Some(5), Some(2), Some(8), None, Some(1), Some(7), Some(9)),
+      Vector(None, None, None, None, None, None, None, None, None),
+      Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None),
     )
   )
+
+  def createSudoku(v: Vector[Int]): Sudoku = Sudoku(
+    Vector(
+      v.take(9).map(x => Some(x)),
+      v.slice(9, 18).map(x => Some(x)),
+      v.slice(18, 27).map(x => Some(x)),
+      v.slice(27, 36).map(x => Some(x)),
+      v.slice(36, 45).map(x => Some(x)),
+      v.slice(45, 54).map(x => Some(x)),
+      v.slice(54, 63).map(x => Some(x)),
+      v.slice(63, 72).map(x => Some(x)),
+      v.slice(72, 81).map(x => Some(x)),
+    )
+  )
+
+
 }

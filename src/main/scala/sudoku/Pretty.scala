@@ -50,4 +50,5 @@ object Pretty {
     prettyRow(sudoku.rows(8)),
     lastRowPretty,
   ).mkString("\n")
+
 }
