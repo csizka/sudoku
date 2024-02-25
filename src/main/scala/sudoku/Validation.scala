@@ -190,7 +190,11 @@ object Validation {
     collectEmptyCellCoords(sudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1}
       .foldLeft(sudoku) { case (accCur: Sudoku, (x, y)) => accCur.insert(x, y, possibleSolutionsForCell(sudoku, x, y).toList.head)}
   }
+  def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
+    collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
+  }
 
+  @tailrec
   def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = {
     if (lstOfSudoku.nonEmpty) {
       val curSudoku = lstOfSudoku.head
@@ -215,6 +219,7 @@ object Validation {
     else throw new Exception("the Sudoku is unsolvable")
   }
   def countSolutions(sudoku: Sudoku): Int = {
+    @tailrec
     def countSudokuHelper(lstOfSudoku: List[Sudoku], resSet: Set[Sudoku]): Int = {
       if (lstOfSudoku.nonEmpty) {
         val curSudoku = lstOfSudoku.head
@@ -229,7 +234,6 @@ object Validation {
             countSudokuHelper(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
           }
         else if (isSudokuSolved(curSudoku))
-          println((resSet + curSudoku).size)
           countSudokuHelper(restSudokus, resSet + curSudoku)
         else countSudokuHelper(restSudokus, resSet)
       } else resSet.size

@@ -1,7 +1,9 @@
-package junicamp.sudoku
+package junicamp
+package sudoku
 
 import Sudoku.*
 
+//noinspection ScalaWeakerAccess
 object Pretty {
 
   val firstRowPretty: String =  "╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗"

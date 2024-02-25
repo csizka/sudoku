@@ -1,11 +1,13 @@
-package junicamp.sudoku
+package junicamp
+package sudoku
 
 import Sudoku.*
 import Examples.*
 import Pretty.*
 import Validation.*
 
-//TODO assert istead of prinln
+import scala.util.Random
+
 @main
 def main(): Unit = {
   assert(!areCellsSolved(Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).map(x => Some(x))))
@@ -68,7 +70,11 @@ def main(): Unit = {
   assert(countSolutions(oneCellMissingSudoku) == 1)
   assert(countSolutions(goodSudoku) == 1)
   assert(countSolutions(partiallySolvedGoodSudoku) == 1)
-  println(countSolutions(testingSudoku))
+  assert(countOfSingleChoiceCells(goodSudoku) == 0)
+  assert(countOfSingleChoiceCells(oneCellMissingSudoku)== 1)
+  assert(countOfSingleChoiceCells(someCellMissingSudoku) == 4)
+  println(pretty(easySudokuCreator(goodSudoku)))
+  println(pretty(mediumSudokuCreator(goodSudoku)))
 
 //  try {finishSudoku(notGoodSudoku) } catch {
 //    case e: IllegalArgumentException => println("not solvable Sudoku")

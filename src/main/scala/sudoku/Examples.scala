@@ -1,7 +1,13 @@
-package junicamp.sudoku
+package junicamp
+package sudoku
 
+import scala.util.Random
+import Validation.*
+
+//noinspection ScalaWeakerAccess,TypeAnnotation
 object Examples {
 
+  //noinspection ScalaWeakerAccess
   val row1To9: Row = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9).map(x => Some(x))
 
   val emptyRow: Row = Vector.fill(9)(None)
@@ -108,6 +114,24 @@ object Examples {
       v.slice(72, 81).map(x => Some(x)),
     )
   )
+
+  def easySudokuCreator(sudoku: Sudoku): Sudoku = {
+    def easyHelper(sudoku: Sudoku): Sudoku = {
+      val curSudoku = sudoku.deleteRandomCell()
+      if (countOfSingleChoiceCells(curSudoku) >= 6) easySudokuCreator(curSudoku)
+      else sudoku
+    }
+    easyHelper(sudoku.deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell())
+  }
+  def mediumSudokuCreator(sudoku: Sudoku): Sudoku = {
+    def mediumHelper(sudoku: Sudoku): Sudoku = {
+      val curSudoku = sudoku.deleteRandomCell()
+      if (countOfSingleChoiceCells(curSudoku) >= 1) easySudokuCreator(curSudoku)
+      else sudoku
+    }
+    mediumHelper(sudoku.deleteRandomCell().deleteRandomCell())
+  }
+
 
 
 }
