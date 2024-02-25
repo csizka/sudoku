@@ -177,6 +177,17 @@ object Validation {
         accCur.insert(x, y, singlePossibleValue)
       }
   }
+
+  def fillCellsWithSingleChoicesRepeatedly: Sudoku => Sudoku =
+    fix(fillCellsWithSingleChoices)
+
+  @tailrec
+  def fix[T](f: T => T)(x: T): T = {
+    val res = f(x)
+    if (x != res) fix(f)(res)
+    else x
+  }
+
   def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
     collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
   }
@@ -185,7 +196,7 @@ object Validation {
   def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = lstOfSudoku match {
     case Nil => List.empty
     case curSudoku :: restSudokus =>
-      val singleChoicesFilled = fillCellsWithSingleChoices(curSudoku)
+      val singleChoicesFilled = fix(fillCellsWithSingleChoices)(curSudoku)
       val cellsToFill = collectEmptyCellCoords(singleChoicesFilled).filter { case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) > 0 }
 
       val noMoreCellsToFill = cellsToFill.isEmpty

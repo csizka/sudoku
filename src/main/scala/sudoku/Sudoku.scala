@@ -21,7 +21,17 @@ case class Sudoku(rows: Vector[Row]) {
     }
     deleteHelper(Random.nextInt(9), Random.nextInt(9), None)
   }
+
 }
 
 object Sudoku {
+  def serialize(sudoku: Sudoku): List[String] =
+    sudoku.rows.map { row =>
+      row.map(_.fold(".")(x => x.toString)).mkString + "\n"
+    }.toList
+
+
+  //  def fromPrettyToSudoku(prettySudoku:List[String]): Sudoku = {
+  //
+  //  }
 }

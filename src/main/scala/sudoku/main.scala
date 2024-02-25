@@ -75,7 +75,7 @@ def main(): Unit = {
   assert(countOfSingleChoiceCells(someCellMissingSudoku) == 4)
   println(pretty(easySudokuCreator(goodSudoku)))
   println(pretty(mediumSudokuCreator(goodSudoku)))
-
+  println(serialize(partiallySolvedGoodSudoku))
 //  try {finishSudoku(notGoodSudoku) } catch {
 //    case e: IllegalArgumentException => println("not solvable Sudoku")
 //  }
