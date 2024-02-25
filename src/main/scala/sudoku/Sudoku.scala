@@ -14,6 +14,7 @@ case class Sudoku(rows: Vector[Row]) {
     Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, Some(value))))
   }
 
+  // TODO: make deterministic by instantiating scala.util.Random with a predefined seed (also add seed param for this fun)
   def deleteRandomCell(): Sudoku = {
     def deleteHelper(rowIx: Int, colIx: Int, value: Option[Int]): Sudoku = {
       Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, value)))

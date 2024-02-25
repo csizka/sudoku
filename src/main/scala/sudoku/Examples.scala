@@ -115,6 +115,7 @@ object Examples {
     )
   )
 
+  //TODO: move generation logic to new module (also move all functions that are only needed for this)
   def easySudokuCreator(sudoku: Sudoku): Sudoku = {
     def easyHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()

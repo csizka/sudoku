@@ -7,6 +7,8 @@ import sudoku.Sudoku.*
 
 import scala.annotation.tailrec
 
+// TODO: separate solving algo from validation and move to new file
+
 object Validation {
 
   //Row Tests
@@ -121,9 +123,7 @@ object Validation {
 }
 
   def isSudokuSolved(sudoku: Sudoku): Boolean = {
-    areAllBlocksRepetitionFree(sudoku) &&
-    areAllColumnsRepetitionFree(sudoku) &&
-    allRowsRepetitionFree(sudoku) &&
+    isSudokuRepetitionFree(sudoku) &&
     sudoku.rows.flatten.size == 81 &&
     numOfEmptyCells(sudoku) == 0 &&
     sudoku.rows.flatten.map {
@@ -157,66 +157,54 @@ object Validation {
 
   def sumOfPossibleSolutionsForAllCells(sudoku: Sudoku): Int = {
     val coords = collectEmptyCellCoords(sudoku)
-    coords.foldLeft(0) { case (accCur: Int, (x, y)) => accCur + numOfPossibleSolutionsForCell(sudoku, x, y) }
-  }
-  def sumOfPossibleSolutionsForAllCellsV2(sudoku: Sudoku): Int = {
-    val coords = for {
-      x <- 0 to 8
-      y <- 0 to 8
-    } yield (x, y)
-    coords.foldLeft(0) { case (accCur: Int, (x, y)) => accCur + numOfPossibleSolutionsForCell(sudoku, x, y) }
+    coords
+      .map { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y)}
+      .sum
   }
 
   def numOfEmptyCells(sudoku: Sudoku): Int =
     collectEmptyCellCoords(sudoku).size
 
-  //noinspection ScalaWeakerAccess
   def calcNextSteps(sudoku: Sudoku, row: Int, col: Int): List[Sudoku] = {
     possibleSolutionsForCell(sudoku, row, col).toList.map(x => sudoku.insert(row, col, x))
   }
 
-  //noinspection ScalaWeakerAccess
-  def findCellsToFill(sudoku: Sudoku): IndexedSeq[ (Int, Int)] = {
-    val coords = for {
-      x <- 0 to 8
-      y <- 0 to 8
-    } yield (x, y)
-    coords
-      .filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) > 0 }
-  }
-
-  //noinspection ScalaWeakerAccess
-  def addSingleChoices(sudoku: Sudoku): Sudoku = {
-    collectEmptyCellCoords(sudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1}
-      .foldLeft(sudoku) { case (accCur: Sudoku, (x, y)) => accCur.insert(x, y, possibleSolutionsForCell(sudoku, x, y).toList.head)}
+  def fillCellsWithSingleChoices(sudoku: Sudoku): Sudoku = {
+    collectEmptyCellCoords(sudoku)
+      .map { case (x, y) => (x, y, possibleSolutionsForCell(sudoku, x, y).toList)}
+      .collect { case (x, y, List(singlePossibleValue)) => (x, y, singlePossibleValue) }
+      .foldLeft(sudoku) { case (accCur: Sudoku, (x, y, singlePossibleValue)) =>
+        accCur.insert(x, y, singlePossibleValue)
+      }
   }
   def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
     collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
   }
 
   @tailrec
-  def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = {
-    if (lstOfSudoku.nonEmpty) {
-      val curSudoku = lstOfSudoku.head
-      val restSudokus = lstOfSudoku.drop(1)
-      val cellsToFill = collectEmptyCellCoords(curSudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) > 0 }
-      if (cellsToFill.nonEmpty)
-        val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
-        if (singleChoices.nonEmpty)
-          calcLogicalNextSteps(addSingleChoices(curSudoku) +: restSudokus)
-        else {
-          val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
-          calcLogicalNextSteps(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus)
-        }
-      else if (isSudokuSolved(curSudoku))
-          List(curSudoku)
-      else calcLogicalNextSteps(restSudokus)
-    } else throw new IllegalArgumentException("the Sudoku is unsolvable")
+  def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = lstOfSudoku match {
+    case Nil => List.empty
+    case curSudoku :: restSudokus =>
+      val singleChoicesFilled = fillCellsWithSingleChoices(curSudoku)
+      val cellsToFill = collectEmptyCellCoords(singleChoicesFilled).filter { case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) > 0 }
+
+      val noMoreCellsToFill = cellsToFill.isEmpty
+      lazy val sudokuIsSolved = isSudokuSolved(singleChoicesFilled)
+
+      if (noMoreCellsToFill && sudokuIsSolved) {
+        List(singleChoicesFilled)
+      } else if (noMoreCellsToFill && !sudokuIsSolved) {
+        calcLogicalNextSteps(restSudokus)
+      } else {
+        val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
+        calcLogicalNextSteps(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus)
+      }
   }
-  def finishSudoku(sudoku: Sudoku): Sudoku = {
+
+  def finishSudoku(sudoku: Sudoku): Option[Sudoku] = {
     if (isSudokuValid(sudoku) && isSudokuRepetitionFree(sudoku))
-      calcLogicalNextSteps(List(sudoku)).head
-    else throw new Exception("the Sudoku is unsolvable")
+      calcLogicalNextSteps(List(sudoku)).headOption
+    else None
   }
   def countSolutions(sudoku: Sudoku): Int = {
     @tailrec
@@ -228,7 +216,7 @@ object Validation {
         if (cellsToFill.nonEmpty)
           val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
           if (singleChoices.nonEmpty)
-            countSudokuHelper(addSingleChoices(curSudoku) +: restSudokus, resSet)
+            countSudokuHelper(fillCellsWithSingleChoices(curSudoku) +: restSudokus, resSet)
           else {
             val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
             countSudokuHelper(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
