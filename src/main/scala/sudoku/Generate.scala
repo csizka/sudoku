@@ -1,11 +1,12 @@
 package junicamp
 package sudoku
 
-import Validation.*
+import sudoku.Validation.*
+import sudoku.Solving.*
 
 import scala.annotation.tailrec
 
-object GenerateSudoku {
+object Generate {
   def generateEasySudoku(sudoku: Sudoku): Sudoku = {
     def easyHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
@@ -20,6 +21,16 @@ object GenerateSudoku {
     def mediumHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
       if (countOfSingleChoiceCells(curSudoku) >= 1) generateEasySudoku(curSudoku)
+      else sudoku
+    }
+
+    mediumHelper(sudoku.deleteRandomCell().deleteRandomCell())
+  }
+
+  def generateHardSudoku(sudoku: Sudoku): Sudoku = {
+    def mediumHelper(sudoku: Sudoku): Sudoku = {
+      val curSudoku = sudoku.deleteRandomCell()
+      if (countOfSingleChoiceCells(curSudoku) > 0) generateEasySudoku(curSudoku)
       else sudoku
     }
 
