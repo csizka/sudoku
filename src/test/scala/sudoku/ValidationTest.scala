@@ -3,6 +3,7 @@ package sudoku
 
 import sudoku.Examples.*
 import sudoku.Validation.*
+import GenerateSudoku.*
 
 import utest.*
 

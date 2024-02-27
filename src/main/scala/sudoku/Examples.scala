@@ -115,23 +115,7 @@ object Examples {
     )
   )
 
-  //TODO: move generation logic to new module (also move all functions that are only needed for this)
-  def easySudokuCreator(sudoku: Sudoku): Sudoku = {
-    def easyHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 6) easySudokuCreator(curSudoku)
-      else sudoku
-    }
-    easyHelper(sudoku.deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell())
-  }
-  def mediumSudokuCreator(sudoku: Sudoku): Sudoku = {
-    def mediumHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 1) easySudokuCreator(curSudoku)
-      else sudoku
-    }
-    mediumHelper(sudoku.deleteRandomCell().deleteRandomCell())
-  }
+  
 
 
 
