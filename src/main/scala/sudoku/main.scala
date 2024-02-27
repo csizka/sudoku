@@ -5,6 +5,7 @@ import Sudoku.*
 import Examples.*
 import Pretty.*
 import Validation.*
+import GenerateSudoku.*
 
 import scala.util.Random
 
@@ -73,10 +74,13 @@ def main(): Unit = {
   assert(countOfSingleChoiceCells(goodSudoku) == 0)
   assert(countOfSingleChoiceCells(oneCellMissingSudoku)== 1)
   assert(countOfSingleChoiceCells(someCellMissingSudoku) == 4)
-  println(pretty(easySudokuCreator(goodSudoku)))
-  println(pretty(mediumSudokuCreator(goodSudoku)))
+  println(pretty(generateEasySudoku(goodSudoku)))
+  println(pretty(generateMediumSudoku(goodSudoku)))
   println(serialize(partiallySolvedGoodSudoku))
-//  try {finishSudoku(notGoodSudoku) } catch {
+  println(serialize(goodSudoku))
+  assert(deserialize(serialize(goodSudoku)) == goodSudoku)
+  assert(deserialize(serialize(partiallySolvedGoodSudoku)) == partiallySolvedGoodSudoku)
+  //  try {finishSudoku(notGoodSudoku) } catch {
 //    case e: IllegalArgumentException => println("not solvable Sudoku")
 //  }
 

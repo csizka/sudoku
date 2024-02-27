@@ -31,7 +31,14 @@ object Sudoku {
     }.toList
 
 
-  //  def fromPrettyToSudoku(prettySudoku:List[String]): Sudoku = {
-  //
-  //  }
+  def deserialize(serializedSudoku: List[String]): Sudoku = {
+    Sudoku(serializedSudoku.map {
+      _.stripSuffix("\n").map {
+        case '.' => None
+        case x => Some(x.toInt - 48)
+      }.toVector
+    }.toVector)
+  }
+
+
 }
