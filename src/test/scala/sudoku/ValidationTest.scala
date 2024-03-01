@@ -9,7 +9,10 @@ import sudoku.Solving.*
 import Generate.*
 import utest.*
 
-import scala.runtime.stdLibPatches.Predef.assert
+import java.nio.file.{Files, Paths, Path}
+import scala.jdk.CollectionConverters.*
+import java.awt.event.KeyEvent
+
 
 object ValidationTest extends TestSuite {
   val tests = Tests {
@@ -37,7 +40,7 @@ object ValidationTest extends TestSuite {
         isSudokuRepetitionFree(notGoodSudoku) ==> false
         isSudokuRepetitionFree(testSudoku1) ==> false
         areCellsRepetitionFree(goodSudoku.rows(0)) ==> true
-        val filledRepetitiveRow = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9).map(x => Some(x))
+        val filledRepetitiveRow = Vector(1, 2, 3, 4, 5, 6, 8, 8, 9).map(x => Some(x))
         areCellsRepetitionFree(filledRepetitiveRow) ==> false
       }
       test("areCellsFilled"){
@@ -130,6 +133,23 @@ object ValidationTest extends TestSuite {
       val deserializedSerializedNotGoodSudoku = deserialize(serialize(notGoodSudoku))
       deserializedSerializedNotGoodSudoku ==> notGoodSudoku
     }
+    test("testSavingAndReading"){
+      def testSavingAndReading(path: Path, sudoku: Sudoku): Unit = {
+        save(sudoku, path)
+        println("sudoku saved")
+        Files.exists(path) ==> true
+        load(path) ==> sudoku
+        Files.delete(path)
+        println("sudoku deleted")
+      }
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
+
+
+
+    }
+
 
   }
 }

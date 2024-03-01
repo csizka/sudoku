@@ -1,29 +1,25 @@
 package junicamp
 package sudoku
 
-import Sudoku.*
-import Examples.*
+import java.nio.file.{Files, Paths, Path}
+import scala.jdk.CollectionConverters.*
+import sudoku.Sudoku.*
+import sudoku.Examples.*
 import Pretty.*
-import sudoku.Validation.*
 
-import Generate.*
-import Solving.*
-
-import scala.util.Random
-import java.nio.file.{Files, Paths}
-import scala.jdk.CollectionConverters._
 
 @main
 def main(): Unit = {
-  val path = Paths.get("./test.txt")
-  Files.write(path, List("Hello world!", "second line").asJava)
+  def testSavingAndReading(path: Path, sudoku: Sudoku): Unit = {
+    save(sudoku, path)
+    println("sudoku saved")
+    println(pretty(load(path)))
+    Files.delete(path)
+    println("sudoku deleted")
+  }
 
-  val lines = Files.readAllLines(path).asScala
-  println(lines)
+  testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
 
-  val wholeFileAsString = Files.readString(path)
-  println(wholeFileAsString)
-
-  val bytes = Files.readAllBytes(path).toList
-  println(bytes)
+  println(serialize(partiallySolvedGoodSudoku))
+  println(partiallySolvedGoodSudoku)
 }
