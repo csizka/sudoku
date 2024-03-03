@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 import scala.util.Random
 
-class misc {
+object Misc{
   def guessingGame(): Unit = {
     val randomNum = Random.nextInt(101)
     println("Guess the number between 0 and 100:")
@@ -21,7 +21,8 @@ class misc {
       guessedNum = readLine().toInt
       i = i + 1
     }
-    println(s"You found the number: $randomNum in $i guesses, congrats!")}
+    println(s"You found the number: $randomNum in $i guesses, congrats!")
+  }
 
   def guessingGameV2(): Unit = {
     val randomNum = Random.nextInt(101)
@@ -44,6 +45,9 @@ class misc {
         checkGuessedNum(newGuess, newMin, max, numTries + 1)
       }
     }
+
     checkGuessedNum(readLine().toInt, 0, 100, 1)
   }
+
 }
+

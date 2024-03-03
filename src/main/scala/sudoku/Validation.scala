@@ -5,6 +5,7 @@ import sudoku.Examples.*
 import sudoku.Pretty.*
 import sudoku.Sudoku.*
 import sudoku.Solving.*
+import scala.util.*
 
 import scala.annotation.tailrec
 
@@ -40,27 +41,23 @@ object Validation {
     sudoku.rows.forall(areCellsSolved) && sudoku.rows.size == 9
   }
 
-  //noinspection ScalaWeakerAccess
   def allRowsRepetitionFree(sudoku: Sudoku): Boolean = {
     sudoku.rows.forall(areCellsRepetitionFree)
   }
 
-  //noinspection ScalaWeakerAccess
   // Column tests
-  def getNthColumn(sudoku: Sudoku, n: Int): Column = {
-    if (0<= n && n <= 8)
+  def getNthColumn(sudoku: Sudoku, n: Int): Row = {
+    if (0 <= n && n <= 8)
       sudoku.rows.map(row => row(n))
     else throw new IndexOutOfBoundsException(s" the index inserted: $n is invalid, please use an index between 0 and 8")
   }
-
-  //noinspection ScalaWeakerAccess
+  
   def getAllColumns(sudoku: Sudoku): Vector[Column] = {
     sudoku.rows.indices
       .map(n => getNthColumn(sudoku, n))
       .toVector
   }
 
-  //noinspection ScalaWeakerAccess
   def areAllColumnsRepetitionFree(sudoku: Sudoku): Boolean = {
     getAllColumns(sudoku).forall(areCellsRepetitionFree)
   }
@@ -69,7 +66,6 @@ object Validation {
     getAllColumns(sudoku).forall(areCellsSolved)
   }
 
-  //noinspection ScalaWeakerAccess
   def getNthBlock(sudoku: Sudoku, n: Int): Block = {
     if (0 <= n && n <= 8) {
       val row = n / 3 * 3
@@ -134,5 +130,5 @@ object Validation {
 
   }
 
-  
+
 }

@@ -5,7 +5,8 @@ import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters.*
 import sudoku.Sudoku.*
 import sudoku.Examples.*
-import sudoku.misc.*
+import sudoku.Misc.*
+import sudoku.Generate.*
 
 import Pretty.*
 

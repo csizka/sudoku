@@ -3,14 +3,31 @@ package sudoku
 
 import sudoku.Validation.*
 import sudoku.Solving.*
+import sudoku.Sudoku.*
+import sudoku.Examples.*
+import scala.util.Random
 
 import scala.annotation.tailrec
 
+// TODO: make generation deterministic by adding seeds to functions
+// val rnd = new Random(rndSeed)
+// val rdnNum - rnd.nextInt
 object Generate {
+
+  def generateSolvedSudoku(): Sudoku = {
+    val startSudoku = emptySudoku.insert(Random.nextInt(9), Random.nextInt(9), Random.nextInt(8) + 1)
+
+    finishSudoku(startSudoku).get
+  }
+  def generateNonRandomSolvedSudoku(row: Int, column: Int): Sudoku = {
+    val startSudoku = emptySudoku.insert(row, column, Random.nextInt(8) + 1)
+    finishSudoku(startSudoku).get
+  }
   def generateEasySudoku(sudoku: Sudoku): Sudoku = {
+    @tailrec
     def easyHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 6) generateEasySudoku(curSudoku)
+      if (countOfSingleChoiceCells(curSudoku) >= 6) easyHelper(curSudoku)
       else sudoku
     }
 
@@ -18,9 +35,10 @@ object Generate {
   }
 
   def generateMediumSudoku(sudoku: Sudoku): Sudoku = {
+    @tailrec
     def mediumHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 1) generateEasySudoku(curSudoku)
+      if (countOfSingleChoiceCells(curSudoku) >= 1) mediumHelper(curSudoku)
       else sudoku
     }
 
@@ -28,13 +46,22 @@ object Generate {
   }
 
   def generateHardSudoku(sudoku: Sudoku): Sudoku = {
-    def mediumHelper(sudoku: Sudoku): Sudoku = {
+    @tailrec
+    def hardHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) > 0) generateEasySudoku(curSudoku)
+      if (countOfSingleChoiceCells(curSudoku) > 0) hardHelper(curSudoku)
       else sudoku
     }
-
-    mediumHelper(sudoku.deleteRandomCell().deleteRandomCell())
+    hardHelper(sudoku.deleteRandomCell().deleteRandomCell())
+  }
+  def generateTheHardestSudoku(sudoku: Sudoku): Sudoku = {
+    @tailrec
+    def hardestHelper(sudoku: Sudoku): Sudoku = {
+      val curSudoku = sudoku.deleteRandomCell()
+      if (sumOfPossibleSolutionsForAllCells(curSudoku) == 1) hardestHelper(curSudoku)
+      else sudoku
+    }
+    hardestHelper(sudoku)
   }
 
   def countSolutions(sudoku: Sudoku): Int = {
@@ -64,6 +91,6 @@ object Generate {
   def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
     collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
   }
-  
-  
+
+
 }

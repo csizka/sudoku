@@ -66,6 +66,9 @@ object Sudoku {
           }.toVector
         }.toVector
     )
+  }
+
+  def giveHint(sudoku: Sudoku): Unit = {
 
   }
 
