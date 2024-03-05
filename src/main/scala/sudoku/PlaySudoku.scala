@@ -30,24 +30,36 @@ object PlaySudoku {
     sudoku.rows(row)(column).isEmpty
   }
 
-  def identifyRepetitiveVector(rows: Vector[Row]): Option[Int] = {
-    {0 to 8}.toList.find(x => !areCellsRepetitionFree(rows(x)))
+  def isColumnRepetitive(sudoku: Sudoku, index: Int): String = {
+    if(areCellsRepetitionFree(getNthColumn(sudoku, index))) "not repetitive"
+    else "repetitive"
   }
 
-  def identifyRepetitiveColumn(sudoku: Sudoku): Option[Int] = {
-    val allColumns = getAllColumns(sudoku)
-    identifyRepetitiveVector(allColumns)
+  def isBlockRepetitive(sudoku: Sudoku, index: Int): String = {
+    if (areCellsRepetitionFree(getNthBlock(sudoku, index))) "not repetitive"
+    else "repetitive"
   }
 
-  def identifyRepetitiveBlock(sudoku: Sudoku): Option[Int] = {
-    val allBlocks = getAllBlocks(sudoku)
-    identifyRepetitiveVector(allBlocks)
+  def isRowRepetitive(sudoku: Sudoku, index: Int): String = {
+    if (areCellsRepetitionFree(sudoku.rows(index))) "not repetitive"
+    else "repetitive"
   }
 
-  def identifyRepetitiveRow(sudoku: Sudoku): Option[Int] = {
-    val allRows = sudoku.rows
-    identifyRepetitiveVector(sudoku.rows)
+  @tailrec
+  def generateSudoku(): Sudoku = {
+    val level = readLine().toInt
+    if (level == 1) {
+      generateEasySudoku(generateNonRandomSolvedSudoku(0, 0))
+    } else if (level == 2) {
+      generateMediumSudoku(generateNonRandomSolvedSudoku(0, 0))
+    } else if (level == 3) {
+      generateHardSudoku(generateNonRandomSolvedSudoku(0, 0))
+    } else {
+      println(s"Invalid level requested: $level. Please write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard")
+      generateSudoku()
+    }
   }
+
 
   @tailrec
     def fillCell(sudoku: Sudoku, name: String): Unit = {
@@ -61,13 +73,16 @@ object PlaySudoku {
       println(s"Which number do you want to write in to row ${rowIndex + 1}, column ${columnIndex + 1}? (1-9)")
       val value = readCurNum
       val curSudoku = sudoku.insert(rowIndex, columnIndex, value)
-      if (isSudokuSolved(curSudoku)) {
-        println(s" Congrats $name, you have solved the Sudoku! ^.^ Look at how beautiful it is:")
+      val sudokuIsSolved = isSudokuSolved(curSudoku)
+      val sudokuIsRepetitionFree = isSudokuRepetitionFree(curSudoku)
+      if (sudokuIsSolved) {
+        println(s"Congrats $name, you have solved the Sudoku! ^.^ Look at how beautiful it is:")
         println(pretty(curSudoku))
-      } else if (!isSudokuSolved(curSudoku) && isSudokuRepetitionFree(curSudoku)) {
+      } else if (!sudokuIsSolved && sudokuIsRepetitionFree) {
         fillCell(curSudoku, name)
-      } else if (!isSudokuRepetitionFree(curSudoku)) {
-
+      } else if (!sudokuIsRepetitionFree) {
+      println(s"$value makes the sudoku repetitive. Details: row ${rowIndex + 1} is ${isRowRepetitive(curSudoku,rowIndex)}, column ${columnIndex + 1} is ${isColumnRepetitive(curSudoku,columnIndex)}, block is ${isRowRepetitive(curSudoku,(rowIndex / 3 * 3) + (columnIndex / 3))},Please try writing something else in!")
+        fillCell(sudoku, name)
       }
     } else if (!cellIsEmpty(sudoku: Sudoku, rowIndex: Int, columnIndex: Int)) {
       println(s"The cell you wanted to write into is not empty. Check row ${rowIndex + 1}, column ${columnIndex + 1}, and try again.")
@@ -78,34 +93,17 @@ object PlaySudoku {
   def playSudoku(): Unit = {
     println("Write your name to start a new game!")
     val name = readLine()
-    println(s"Hi $name, write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard, 4: Very Hard")
-
-    def checkLevel(): Unit = {}
-    val level = readLine().toInt
-    if (level == 1) {
-      val sudoku = generateEasySudoku(generateNonRandomSolvedSudoku(0, 0))
-
-
-    } else if (level == 2) {
-      val sudoku = generateMediumSudoku(generateNonRandomSolvedSudoku(0, 0))
-
-    } else if (level == 3) {
-      val sudoku = generateHardSudoku(generateNonRandomSolvedSudoku(0, 0))
-
-    } else if (level == 4) {
-      val sudoku = generateTheHardestSudoku(generateNonRandomSolvedSudoku(0, 0))
-
-    } else {
-      println(s"Invalid level requested: $level. Please write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard, 4: Very Hard ")
-      checkLevel()
-    }
-    checkLevel()
-
+    println(s"Hi $name, write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard")
+    val sudoku = generateSudoku()
+    fillCell(sudoku, name)
   }
 
 
-
   def main(args: Array[String]): Unit = {
+playSudoku()
+
+
+
 
   }
 

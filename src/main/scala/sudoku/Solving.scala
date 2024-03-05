@@ -14,12 +14,10 @@ object Solving {
         getNthBlock(sudoku, (rowIndex / 3 * 3) + (columnIndex / 3)).flatten.toSet
     else throw new IndexOutOfBoundsException(s"Row index $rowIndex || $columnIndex is/ are not valid, please give a number between 0 and 8.")
   }
-
-  //noinspection ScalaWeakerAccess
+  
   def numOfPossibleSolutionsForCell(sudoku: Sudoku, rowIndex: Int, columnIndex: Int): Int =
     possibleSolutionsForCell(sudoku, rowIndex, columnIndex).size
-
-  //noinspection ScalaWeakerAccess
+  
   def collectEmptyCellCoords(sudoku: Sudoku): List[(Int, Int)] = {
     val coords = for {
       x <- 0 to 8
@@ -53,7 +51,6 @@ object Solving {
 
   def fillCellsWithSingleChoicesRepeatedly: Sudoku => Sudoku =
     fix(fillCellsWithSingleChoices)
-
 
   @tailrec
   def fix[T](f: T => T)(x: T): T = {

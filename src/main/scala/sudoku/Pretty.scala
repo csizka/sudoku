@@ -6,10 +6,10 @@ import Sudoku.*
 //noinspection ScalaWeakerAccess
 object Pretty {
 
-  val firstRowPretty: String =  "╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗"
+  val firstRowPretty: String =  "╔═1═╤═2═╤═3═╦═4═╤═5═╤═6═╦═7═╤═8═╤═9═╗"
   val singleRowPretty: String = "╟───┼───┼───╫───┼───┼───╫───┼───┼───╢"
   val doubleRowPretty: String = "╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣"
-  val lastRowPretty: String =   "╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"
+  val lastRowPretty: String =   "╚═1═╧═2═╧═3═╩═4═╧═5═╧═6═╩═7═╧═8═╧═9═╝"
 
   def prettyCell(cell: Cell): String = cell match {
     case Some(x) => x.toString
@@ -32,25 +32,25 @@ object Pretty {
   ).mkString
 
   def pretty(sudoku: Sudoku): String = List(
-    firstRowPretty,
-    prettyRow(sudoku.rows(0)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(1)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(2)),
-    doubleRowPretty,
-    prettyRow(sudoku.rows(3)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(4)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(5)),
-    doubleRowPretty,
-    prettyRow(sudoku.rows(6)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(7)),
-    singleRowPretty,
-    prettyRow(sudoku.rows(8)),
-    lastRowPretty,
+    " " + firstRowPretty + " ",
+    "1" + prettyRow(sudoku.rows(0)) + "1",
+    " " + singleRowPretty + " ",
+    "2" + prettyRow(sudoku.rows(1)) + "2",
+    " " + singleRowPretty + " ",
+    "3" + prettyRow(sudoku.rows(2)) + "3",
+    " " + doubleRowPretty + " ",
+    "4" + prettyRow(sudoku.rows(3)) + "4",
+    " " + singleRowPretty + " ",
+    "5" + prettyRow(sudoku.rows(4)) + "5",
+    " " + singleRowPretty + " ",
+    "6" + prettyRow(sudoku.rows(5)) + "6",
+    " " + doubleRowPretty + " ",
+    "7" + prettyRow(sudoku.rows(6)) + "7",
+    " " + singleRowPretty + " ",
+    "8" + prettyRow(sudoku.rows(7)) + "8",
+    " " + singleRowPretty + " ",
+    "9" + prettyRow(sudoku.rows(8)) + "9",
+    " " + lastRowPretty + " ",
   ).mkString("\n")
 
 

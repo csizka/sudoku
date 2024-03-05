@@ -88,8 +88,7 @@ object Validation {
     }
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
-
-  //noinspection ScalaWeakerAccess
+  
   def getAllBlocks(sudoku: Sudoku): Vector[Column] = {
     if (sudoku.rows.nonEmpty) {
       sudoku.rows.indices
@@ -98,8 +97,7 @@ object Validation {
     }
     else Vector.empty[Column]
   }
-
-  //noinspection ScalaWeakerAccess
+  
   def areAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {
     getAllBlocks(sudoku).forall(areCellsRepetitionFree)
   }
@@ -107,8 +105,7 @@ object Validation {
   def areAllBlocksSolved(sudoku: Sudoku): Boolean = {
     getAllBlocks(sudoku).forall(areCellsSolved)
   }
-
-// All Rows && Columns && Blocks validation
+  
   def isSudokuRepetitionFree(sudoku:Sudoku): Boolean = {
     areAllBlocksRepetitionFree(sudoku) &&
     areAllColumnsRepetitionFree(sudoku) &&
@@ -129,6 +126,4 @@ object Validation {
     }.toSet == (1 to 9).toSet
 
   }
-
-
 }
