@@ -5,8 +5,10 @@ import sudoku.Validation.*
 import sudoku.Solving.*
 import sudoku.Sudoku.*
 import sudoku.Examples.*
-import scala.util.Random
 
+import junicamp.sudoku.Generate.countSolutions
+
+import scala.util.Random
 import scala.annotation.tailrec
 
 // TODO: make generation deterministic by adding seeds to functions
@@ -27,18 +29,18 @@ object Generate {
     @tailrec
     def easyHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 6) easyHelper(curSudoku)
+      if (numOfEmptyCells(curSudoku) <= 20 && countSolutions(curSudoku) == 1) easyHelper(curSudoku)
       else sudoku
     }
 
-    easyHelper(sudoku.deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell().deleteRandomCell())
+    easyHelper(sudoku)
   }
 
   def generateMediumSudoku(sudoku: Sudoku): Sudoku = {
     @tailrec
     def mediumHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) >= 1) mediumHelper(curSudoku)
+      if (numOfEmptyCells(curSudoku) <= 30 && countSolutions(curSudoku) == 1) mediumHelper(curSudoku)
       else sudoku
     }
 
@@ -49,7 +51,7 @@ object Generate {
     @tailrec
     def hardHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (countOfSingleChoiceCells(curSudoku) > 0) hardHelper(curSudoku)
+      if (numOfEmptyCells(curSudoku) <= 40 && countSolutions(curSudoku) == 1) hardHelper(curSudoku)
       else sudoku
     }
     hardHelper(sudoku.deleteRandomCell().deleteRandomCell())
@@ -58,10 +60,10 @@ object Generate {
     @tailrec
     def hardestHelper(sudoku: Sudoku): Sudoku = {
       val curSudoku = sudoku.deleteRandomCell()
-      if (sumOfPossibleSolutionsForAllCells(curSudoku) == 1) hardestHelper(curSudoku)
+      if (numOfEmptyCells(curSudoku) <= 60 && countSolutions(curSudoku) == 1) hardestHelper(curSudoku)
       else sudoku
     }
-    hardestHelper(sudoku)
+    hardestHelper(sudoku.deleteRandomCell().deleteRandomCell())
   }
 
   def countSolutions(sudoku: Sudoku): Int = {
