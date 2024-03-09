@@ -69,99 +69,44 @@ object PlaySudokuTests extends TestSuite {
       }
     }
     test("execCommand") {
-      test("invalidActions") {
-        test("nullInstructions") {
-          assertMatch(execRawCommand(someCellMissingSudoku, "", testingSudoku)) {
-            case Left(err: String) if err.contains("understood") => ()
-          }
-        }
-        test("nonExistentActions") {
-          assertMatch(execRawCommand(someCellMissingSudoku, "z", testingSudoku)) {
-            case Left(err: String) if err.contains("understood") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "k236", testingSudoku)) {
-            case Left(err: String) if err.contains("understood") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "/123", testingSudoku)) {
-            case Left(err: String) if err.contains("understood") => ()
-          }
-        }
-      }
       test("insertion") {
-        test("nonInsertable") {
-          assertMatch(execRawCommand(someCellMissingSudoku, "i", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "ik36", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "i024", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "i34b", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "i34", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "i740", testingSudoku)) {
-            case Left(err: String) if err.contains("3 numbers") => ()
-          }
-        }
-        test("nonEmpty"){
-          assertMatch(execRawCommand(someCellMissingSudoku, "i114", testingSudoku)) {
+        test("invalid"){
+          assertMatch(execCommand(someCellMissingSudoku, Insert(0,0,4), testingSudoku)) {
             case Left(err: String) if err.contains("only those cells") => ()
           }
-          assertMatch(execRawCommand(someCellMissingSudoku, "i528", testingSudoku)) {
+          assertMatch(execCommand(someCellMissingSudoku, Insert(4,1,8), testingSudoku)) {
             case Left(err: String) if err.contains("only those cells") => ()
           }
         }
-        test("workingInsertion") {
-          assertMatch(execRawCommand(testingSudoku, "i913", testingSudoku)) {
+        test("valid") {
+          assertMatch(execCommand(testingSudoku, Insert(8,0,3), testingSudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.insert(8,0,3) => ()
           }
-          assertMatch(execRawCommand(testingSudoku, "i192", testingSudoku)) {
+          assertMatch(execCommand(testingSudoku, Insert(0,8,2), testingSudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.insert(0,8,2) => ()
           }
-          assertMatch(execRawCommand(testingSudoku, "i589", testingSudoku)) {
+          assertMatch(execCommand(testingSudoku, Insert(4,7,9), testingSudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.insert(4,7,9) => ()
           }
         }
       }
       test("deletion") {
-        test("nonValidIxes") {
-          assertMatch(execRawCommand(someCellMissingSudoku, "d", testingSudoku)) {
-            case Left(err: String) if err.contains("2 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "d)4", testingSudoku)) {
-            case Left(err: String) if err.contains("2 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "d40", testingSudoku)) {
-            case Left(err: String) if err.contains("2 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "d03", testingSudoku)) {
-            case Left(err: String) if err.contains("2 numbers") => ()
-          }
-          assertMatch(execRawCommand(someCellMissingSudoku, "d5", testingSudoku)) {
-            case Left(err: String) if err.contains("2 numbers") => ()
-          }
-        }
-        test("nonEmpty") {
-          assertMatch(execRawCommand(someCellMissingSudoku, "d11", testingSudoku)) {
+        test("invalid") {
+          assertMatch(execCommand(someCellMissingSudoku, Delete(0,0), testingSudoku)) {
             case Left(err: String) if err.contains("was empty at the beginning") => ()
           }
-          assertMatch(execRawCommand(someCellMissingSudoku, "d52", testingSudoku)) {
+          assertMatch(execCommand(someCellMissingSudoku, Delete(4,1), testingSudoku)) {
             case Left(err: String) if err.contains("was empty at the beginning") => ()
           }
         }
-        test("workingDeletion") {
-          assertMatch(execRawCommand(testingSudoku, "d59", emptySudoku)) {
+        test("valid") {
+          assertMatch(execCommand(testingSudoku, Delete(4, 8), emptySudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.delete(4, 8) => ()
           }
-          assertMatch(execRawCommand(testingSudoku, "d18", emptySudoku)) {
+          assertMatch(execCommand(testingSudoku, Delete(0, 7), emptySudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.delete(0, 7) => ()
           }
-          assertMatch(execRawCommand(testingSudoku, "d71", emptySudoku)) {
+          assertMatch(execCommand(testingSudoku, Delete(6, 0), emptySudoku)) {
             case Right(x: Sudoku) if x == testingSudoku.delete(6, 0) => ()
           }
         }
