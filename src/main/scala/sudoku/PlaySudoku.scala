@@ -44,7 +44,7 @@ object PlaySudoku {
     else false
   }
 
-  def execCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Option[Sudoku] = {
+  def execCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Either[String, Sudoku] = {
     val charCount = instructions.length
     val action = {
       if (charCount > 0) instructions.charAt(0)
@@ -60,12 +60,10 @@ object PlaySudoku {
     }
 
     if (action == 'i' && !insertable) {
-      println(s"Insertion could not be completed with the command $instructions. (>_<) After the letter 'i' there has to be 3 numbers that are between 1 and 9, and they have to point to a cell, that was empty in the original sudoku. Please try something else!")
-      None
+      Left(s"Insertion could not be completed with the command $instructions. (>_<) After the letter 'i' there has to be 3 numbers that are between 1 and 9, and they have to point to a cell, that was empty in the original sudoku. Please try something else!")
 
     } else if (action == 'i' && insertable && !cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-      println(s"Insertion could not be completed with the command $instructions. (o_o) only those cells can be modified, that were empty in the original sudoku. Please try something else!")
-      None
+      Left(s"Insertion could not be completed with the command $instructions. (o_o) only those cells can be modified, that were empty in the original sudoku. Please try something else!")
 
     } else if (action == 'i' && insertable && cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
       val rowIx = instructions.charAt(1).toInt - 49
@@ -73,26 +71,24 @@ object PlaySudoku {
       val value = instructions.charAt(3).toInt - 48
       println(s"inserting value: $value to row: ${rowIx + 1} column: ${colIx + 1}")
       val nextSudoku = curSudoku.insert(rowIx, colIx, value)
-      Some(nextSudoku)
+      Right(nextSudoku)
 
     } else if (action == 'd' && !validIxes) {
-      println(s"Deletion could not be completed with command: $instructions. (-_-) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
-      None
+      Left(s"Deletion could not be completed with command: $instructions. (-_-) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
+
 
     } else if (action == 'd' && validIxes && !cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-      println(s"Deletion could not be completed with command: $instructions. (u_u) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
-      None
+      Left(s"Deletion could not be completed with command: $instructions. (u_u) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
 
     } else if (action == 'd' && validIxes && cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
       val rowIx = instructions.charAt(1).toInt - 49
       val colIx = instructions.charAt(2).toInt - 49
       println(s"deleting value in row: ${rowIx + 1} column: ${colIx + 1}")
       val nextSudoku = curSudoku.delete(rowIx, colIx, None)
-      Some(nextSudoku)
+      Right(nextSudoku)
 
     } else {
-      println(s"Your command: '$instructions' was not understood, please check what went wrong and try something else! (~_~)")
-      None
+      Left(s"Your command: '$instructions' was not understood, please check what went wrong and try something else! (~_~)")
     }
   }
 
@@ -115,8 +111,10 @@ object PlaySudoku {
       val instructions = readLine()
 
       execCommand(curSudoku, instructions, startSudoku) match {
-        case Some(nextSudoku) => choosingNextMove(nextSudoku, name, startSudoku)
-        case None => choosingNextMove(curSudoku, name, startSudoku)
+        case Right(nextSudoku) => choosingNextMove(nextSudoku, name, startSudoku)
+        case Left(error) =>
+          println(error)
+          choosingNextMove(curSudoku, name, startSudoku)
       }
 
     }
