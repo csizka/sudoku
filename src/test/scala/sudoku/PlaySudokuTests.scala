@@ -64,43 +64,13 @@ object PlaySudokuTests extends TestSuite {
         }
         test("workingInsertion") {
           assertMatch(execCommand(testingSudoku, "i913", testingSudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), None),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, Some(1)),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(Some(3), None, Some(5), None, Some(8), None, Some(1), Some(7), None)))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.insert(8,0,3) => ()
           }
           assertMatch(execCommand(testingSudoku, "i192", testingSudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), Some(2)),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, Some(1)),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None)))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.insert(0,8,2) => ()
           }
           assertMatch(execCommand(testingSudoku, "i589", testingSudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), None),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), Some(9), Some(1)),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None)))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.insert(4,7,9) => ()
           }
         }
       }
@@ -132,44 +102,13 @@ object PlaySudokuTests extends TestSuite {
         }
         test("workingDeletion") {
           assertMatch(execCommand(testingSudoku, "d59", emptySudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), None),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, None),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None)))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.delete(4, 8) => ()
           }
           assertMatch(execCommand(testingSudoku, "d18", emptySudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, None, None),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, Some(1)),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(Some(9), Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None),
-            ))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.delete(0, 7) => ()
           }
           assertMatch(execCommand(testingSudoku, "d71", emptySudoku)) {
-            case Right(Sudoku(
-            Vector(
-            Vector(Some(5), None, Some(4), None, Some(7), None, None, Some(1), None),
-            Vector(Some(6), Some(7), None, None, None, None, Some(3), Some(4), Some(8)),
-            Vector(Some(1), None, None, Some(3), None, None, Some(5), None, None),
-            Vector(None, Some(5), None, None, None, Some(1), None, None, None),
-            Vector(None, Some(2), None, Some(8), Some(5), None, Some(7), None, Some(1)),
-            Vector(Some(7), None, None, Some(9), None, Some(4), None, None, Some(6)),
-            Vector(None, Some(6), Some(1), None, Some(3), Some(7), None, Some(8), None),
-            Vector(None, None, None, None, None, None, None, None, None),
-            Vector(None, None, Some(5), None, Some(8), None, Some(1), Some(7), None)))) => ()
+            case Right(x: Sudoku) if x == testingSudoku.delete(6, 0) => ()
           }
         }
       }

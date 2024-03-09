@@ -16,7 +16,7 @@ case class Sudoku(rows: Vector[Row]) {
   def insert(rowIx: Int, colIx: Int, value: Int): Sudoku = {
     Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, Some(value))))
   }
-  def delete(rowIx: Int, colIx: Int, value: Option[Int]): Sudoku = {
+  def delete(rowIx: Int, colIx: Int): Sudoku = {
     Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, None)))
   }
 
@@ -27,7 +27,6 @@ case class Sudoku(rows: Vector[Row]) {
     }
     deleteHelper(Random.nextInt(9), Random.nextInt(9), None)
   }
-
 }
 
 object Sudoku {

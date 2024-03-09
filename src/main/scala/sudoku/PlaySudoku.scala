@@ -84,7 +84,7 @@ object PlaySudoku {
       val rowIx = instructions.charAt(1).toInt - 49
       val colIx = instructions.charAt(2).toInt - 49
       println(s"deleting value in row: ${rowIx + 1} column: ${colIx + 1}")
-      val nextSudoku = curSudoku.delete(rowIx, colIx, None)
+      val nextSudoku = curSudoku.delete(rowIx, colIx)
       Right(nextSudoku)
 
     } else {
