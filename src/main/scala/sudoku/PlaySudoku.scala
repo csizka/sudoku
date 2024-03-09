@@ -97,7 +97,7 @@ object PlaySudoku {
   }
 
   @tailrec
-  def choosingNextMove2(curSudoku: Sudoku, name: String, startSudoku: Sudoku): Sudoku = {
+  def choosingNextMove(curSudoku: Sudoku, name: String, startSudoku: Sudoku): Sudoku = {
     if (isSudokuSolved(curSudoku)) {
       println(s"Congrats $name, you have solved the Sudoku! (*.*) Look at how beautiful it is:")
       println(pretty(curSudoku))
@@ -115,82 +115,14 @@ object PlaySudoku {
       val instructions = readLine()
 
       execCommand(curSudoku, instructions, startSudoku) match {
-        case Some(nextSudoku) => choosingNextMove2(nextSudoku, name, startSudoku)
-        case None => choosingNextMove2(curSudoku, name, startSudoku)
+        case Some(nextSudoku) => choosingNextMove(nextSudoku, name, startSudoku)
+        case None => choosingNextMove(curSudoku, name, startSudoku)
       }
 
     }
 
   }
 
-  @tailrec
-  def choosingNextMove(curSudoku: Sudoku, name: String, startSudoku: Sudoku): Sudoku = {
-    if (isSudokuSolved(curSudoku)) {
-      println(s"Congrats $name, you have solved the Sudoku! (*.*) Look at how beautiful it is:")
-      println(pretty(curSudoku))
-      curSudoku
-    } else {
-      println("Here is the current state of your Sudoku:")
-      println(pretty(curSudoku))
-      println("Write down your next move in the following format:")
-      println("1st char => action: i = insert, d = delete")
-      println("2nd char => number of the row in which the action should be done (needed for insertion and deletion)")
-      println("3rd char => number of the column in which the action should be done (needed for insertion and deletion)")
-      println("4th char => the value with which the action should be done (needed for insertion)")
-      println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, example 3: r = reset original sudoku.")
-
-      val instructions = readLine()
-      val charCount = instructions.length
-      val action = {
-        if(charCount > 0) instructions.charAt(0)
-        else 'z'
-      }
-      val validIxes = {
-        ixIsValid(instructions, 1, charCount) &&
-        ixIsValid(instructions, 2, charCount)
-      }
-      val insertable = {
-        validIxes &&
-        valueIsValid(instructions, 3, charCount)
-      }
-
-      if (action == 'i' && !insertable) {
-        println(s"Insertion could not be completed with the command $instructions. (>_<) After the letter 'i' there has to be 3 numbers that are between 1 and 9, and they have to point to a cell, that was empty in the original sudoku. Please try something else!")
-        choosingNextMove(curSudoku, name, startSudoku)
-
-      } else if (action == 'i' && insertable && !cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-        println(s"Insertion could not be completed with the command $instructions. (o_o) only those cells can be modified, that were empty in the original sudoku. Please try something else!")
-        choosingNextMove(curSudoku, name, startSudoku)
-
-      } else if (action == 'i' && insertable && cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-        val rowIx = instructions.charAt(1).toInt - 49
-        val colIx = instructions.charAt(2).toInt - 49
-        val value = instructions.charAt(3).toInt - 48
-        println(s"inserting value: $value to row: ${rowIx + 1} column: ${colIx + 1}")
-        val nextSudoku = curSudoku.insert(rowIx, colIx, value)
-        choosingNextMove(nextSudoku, name, startSudoku)
-
-      } else if (action == 'd' && !validIxes) {
-        println(s"Deletion could not be completed with command: $instructions. (-_-) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
-        choosingNextMove(curSudoku, name, startSudoku)
-
-      } else if (action == 'd' && validIxes && !cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-        println(s"Deletion could not be completed with command: $instructions. (u_u) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
-        choosingNextMove(curSudoku, name, startSudoku)
-
-      } else if (action == 'd' && validIxes && cellIsEmpty(startSudoku, instructions.charAt(1).toInt - 49, instructions.charAt(2).toInt - 49)) {
-        val rowIx = instructions.charAt(1).toInt - 49
-        val colIx = instructions.charAt(2).toInt - 49
-        println(s"deleting value in row: ${rowIx + 1} column: ${colIx + 1}")
-        val nextSudoku = curSudoku.delete(rowIx, colIx, None)
-        choosingNextMove(nextSudoku, name, startSudoku)
-
-      } else {
-        println(s"Your command: '$instructions' was not understood, please check what went wrong and try something else! (~_~)")
-        choosingNextMove(curSudoku, name, startSudoku)
-      }}
-
-  }
   def playSudoku(): Unit = {
     println("Write your name to start a new game!(^u^)")
     val name = readLine()
@@ -200,7 +132,7 @@ object PlaySudoku {
   }
 
   def main(args: Array[String]): Unit = {
-    choosingNextMove2(oneCellMissingSudoku, "k", someCellMissingSudoku)
+    choosingNextMove(oneCellMissingSudoku, "k", someCellMissingSudoku)
 
 
 
