@@ -80,7 +80,28 @@ object PlaySudoku {
       s"that was empty at the beginning of the game. Please try something else."
     )
   }
-  def execCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Either[String, Sudoku] = {
+
+  def execCommand(curSudoku: Sudoku, cmd: Command, startSudoku: Sudoku): Either[String, Sudoku] = cmd match {
+    case Insert(rowIx, colIx, value) =>
+      if (cellIsEmpty(startSudoku, rowIx, colIx)) {
+        val nextSudoku = curSudoku.insert(rowIx, colIx, value)
+        println(s"inserting value: $value to row: ${rowIx + 1} column: ${colIx + 1}")
+        Right(nextSudoku)
+      } else {
+        Left(s"Insertion could not be completed with the command $cmd. (o_o)" +
+          s" only those cells can be modified, that were empty in the original sudoku. Please try something else!")
+      }
+    case Delete(rowIx, colIx) =>
+      if (cellIsEmpty(startSudoku, rowIx, colIx)) {
+        println(s"deleting value in row: ${rowIx + 1} column: ${colIx + 1}")
+        val nextSudoku = curSudoku.delete(rowIx, colIx)
+        Right(nextSudoku)
+      } else {
+        Left(s"Deletion could not be completed with command: $cmd. (u_u) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.")
+      }
+    case _ => Left("Unimplemented exec command")
+  }
+  def execRawCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Either[String, Sudoku] = {
     val charCount = instructions.length
     val action = {
       if (charCount > 0) instructions.charAt(0)
@@ -144,17 +165,23 @@ object PlaySudoku {
       println("4th char => the value with which the action should be done (needed for insertion)")
       println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, example 3: r = reset original sudoku.")
 
-      val instructions = readLine()
+      val rawCmdStr = readLine()
+      val parsedCmd = parseCommand(rawCmdStr)
 
-      execCommand(curSudoku, instructions, startSudoku) match {
-        case Right(nextSudoku) => choosingNextMove(nextSudoku, name, startSudoku)
+      parsedCmd match {
+        case Right(cmd) =>
+          execCommand(curSudoku, cmd, startSudoku) match {
+            case Right (nextSudoku) =>
+              choosingNextMove(nextSudoku, name, startSudoku)
+            case Left(error) =>
+              println(error)
+              choosingNextMove(curSudoku, name, startSudoku)
+        }
         case Left(error) =>
           println(error)
           choosingNextMove(curSudoku, name, startSudoku)
       }
-
     }
-
   }
 
   def playSudoku(): Unit = {
