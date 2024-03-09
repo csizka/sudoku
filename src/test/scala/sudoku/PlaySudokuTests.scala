@@ -31,6 +31,43 @@ object PlaySudokuTests extends TestSuite {
         case Right(Insert(8, 4, 8)) => ()
       }
     }
+    test("parseDelCmd") {
+      assertMatch(parseDelCmd("50".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseDelCmd("4".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseDelCmd("k99".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseDelCmd("18".toList)) {
+        case Right(Delete(0, 7)) => ()
+      }
+      assertMatch(parseDelCmd("95".toList)) {
+        case Right(Delete(8, 4)) => ()
+      }
+    }
+    test("parseCommand"){
+      assertMatch(parseCommand("53")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("i53")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("b")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("d18")) {
+        case Right(Delete(0, 7)) => ()
+      }
+      assertMatch(parseCommand("i958")) {
+        case Right(Insert(8, 4, 8)) => ()
+      }
+    }
     test("execCommand") {
       test("invalidActions") {
         test("nullInstructions") {

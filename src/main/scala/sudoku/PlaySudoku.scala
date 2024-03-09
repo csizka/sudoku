@@ -66,13 +66,19 @@ object PlaySudoku {
       if ixIsValid(rowIx) && ixIsValid(colIx) && ixIsValid(valueMinusOne) => Right(Insert(rowIx, colIx, valueMinusOne + 1))
     case _ => Left(
       s"Insertion could not be completed with the command ${args.mkString}. (>_<) " +
-        s"After the letter 'i' there has to be 3 numbers that are between 1 and 9, " +
-        s"and they have to point to a cell, that was empty in the original sudoku. Please try something else!"
+      s"After the letter 'i' there has to be 3 numbers that are between 1 and 9, " +
+      s"and they have to point to a cell, that was empty in the original sudoku. Please try something else!"
     )
   }
 
-  def parseDelCmd(args: List[Char]): Either[String, Command] = {
-    ???
+  def parseDelCmd(args: List[Char]): Either[String, Command] = args.map(x => x.toInt - 49) match {
+    case rowIx :: colIx :: Nil
+      if ixIsValid(rowIx) && ixIsValid(colIx) => Right(Delete(rowIx, colIx))
+    case _ => Left(
+      s"Deletion could not be completed with command: ${args.mkString}. (u_u)" +
+      s" The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, " +
+      s"that was empty at the beginning of the game. Please try something else."
+    )
   }
   def execCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Either[String, Sudoku] = {
     val charCount = instructions.length
