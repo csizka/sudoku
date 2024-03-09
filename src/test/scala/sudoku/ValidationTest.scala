@@ -11,8 +11,6 @@ import utest.*
 
 import java.nio.file.{Files, Paths, Path}
 import scala.jdk.CollectionConverters.*
-import java.awt.event.KeyEvent
-
 
 object ValidationTest extends TestSuite {
   val tests = Tests {
@@ -147,10 +145,10 @@ object ValidationTest extends TestSuite {
       testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }
     test("playSudoku"){
-    
-      
+
+
     }
-    
+
 
 
   }
