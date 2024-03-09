@@ -14,6 +14,23 @@ import scala.jdk.CollectionConverters.*
 
 object PlaySudokuTests extends TestSuite {
   val tests = Tests {
+    test("parseInsertCmd"){
+      assertMatch(parseInsertCmd("53".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseInsertCmd("490".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseInsertCmd("k99".toList)) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseInsertCmd("112".toList)) {
+        case Right(Insert(0, 0, 2)) => ()
+      }
+      assertMatch(parseInsertCmd("958".toList)) {
+        case Right(Insert(8, 4, 8)) => ()
+      }
+    }
     test("execCommand") {
       test("invalidActions") {
         test("nullInstructions") {

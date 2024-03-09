@@ -13,6 +13,10 @@ import Generate.*
 import Validation.*
 import Misc.*
 
+sealed trait Command
+case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
+case class Delete(rowIx: Int, colIx: Int) extends Command
+
 object PlaySudoku {
 
   def cellIsEmpty(sudoku: Sudoku, row: Int, column: Int): Boolean = {
@@ -34,16 +38,42 @@ object PlaySudoku {
     }
   }
 
-
   def ixIsValid(inst: String, ix: Int, length: Int): Boolean = {
     if (length > ix) (0 to 8).contains(inst.charAt(ix).toInt - 49)
     else false
   }
+
   def valueIsValid(inst: String, ix: Int, length: Int): Boolean = {
     if (length > ix) (1 to 9).contains(inst.charAt(ix).toInt - 48)
     else false
   }
 
+  def parseCommand(inst: String): Either[String, Command] = inst.toList match {
+    case Nil => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
+    case 'i' :: rest =>
+      parseInsertCmd(rest)
+    case 'd' :: rest =>
+      parseDelCmd(rest)
+    case _ => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
+  }
+
+  def ixIsValid(ix: Int): Boolean = {
+    (0 to 8).contains(ix)
+  }
+
+  def parseInsertCmd(args: List[Char]): Either[String, Command] = args.map(x => x.toInt - 49) match {
+    case rowIx :: colIx :: valueMinusOne :: Nil
+      if ixIsValid(rowIx) && ixIsValid(colIx) && ixIsValid(valueMinusOne) => Right(Insert(rowIx, colIx, valueMinusOne + 1))
+    case _ => Left(
+      s"Insertion could not be completed with the command ${args.mkString}. (>_<) " +
+        s"After the letter 'i' there has to be 3 numbers that are between 1 and 9, " +
+        s"and they have to point to a cell, that was empty in the original sudoku. Please try something else!"
+    )
+  }
+
+  def parseDelCmd(args: List[Char]): Either[String, Command] = {
+    ???
+  }
   def execCommand(curSudoku: Sudoku, instructions: String, startSudoku: Sudoku): Either[String, Sudoku] = {
     val charCount = instructions.length
     val action = {
@@ -131,7 +161,6 @@ object PlaySudoku {
 
   def main(args: Array[String]): Unit = {
     choosingNextMove(oneCellMissingSudoku, "k", someCellMissingSudoku)
-
 
 
 
