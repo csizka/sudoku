@@ -12,4 +12,5 @@ lazy val root = (project in file("."))
     testFrameworks ++= Seq(
       new TestFramework("utest.runner.Framework")
     ),
+    assembly / mainClass := Some("junicamp.sudoku.main"),
   )

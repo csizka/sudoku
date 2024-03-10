@@ -17,14 +17,5 @@ import scala.util.Random
 
 @main
 def main(): Unit = {
-//  def testSavingAndReading(path: Path, sudoku: Sudoku): Unit = {
-//    save(sudoku, path)
-//    println("sudoku saved")
-//    println(pretty(load(path)))
-//    Files.delete(path)
-//    println("sudoku deleted")
-//  }
-//
-//  testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
-
+  PlaySudoku.main(Array())
 }
