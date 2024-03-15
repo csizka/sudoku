@@ -1,12 +1,14 @@
 package junicamp
 package sudoku
 
+import sudoku.PlaySudoku.*
+import sudoku.Pretty.pretty
+import sudoku.Validation.*
+
 import scala.annotation.tailrec
+import scala.io.AnsiColor
 import scala.io.StdIn.readLine
 import scala.util.Random
-import PlaySudoku.*
-import Validation.*
-import junicamp.sudoku.Pretty.pretty
 
 def isColumnRepetitive(sudoku: Sudoku, index: Int): String = {
   if (areCellsRepetitionFree(getNthColumn(sudoku, index))) "not repetitive"
@@ -110,6 +112,9 @@ object Misc{
     }
 
   }
+
+  def colorMsg(color: String, msg: String): String =
+    color + msg + "\u001b[0m"
 
 }
 
