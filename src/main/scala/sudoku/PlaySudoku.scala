@@ -17,7 +17,7 @@ import Misc.*
 sealed trait Command
 case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
 case class Delete(rowIx: Int, colIx: Int) extends Command
-case Class
+case class Restart() extends Command
 
 object PlaySudoku {
 
@@ -56,6 +56,8 @@ object PlaySudoku {
       parseInsertCmd(rest, inst)
     case 'd' :: rest =>
       parseDelCmd(rest, inst)
+    case 'r' :: Nil =>
+      Right(Restart())
     case _ => Left(s"${RED}Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)$RESET")
   }
 
@@ -83,6 +85,7 @@ object PlaySudoku {
     )
   }
 
+
   def execCommand(curSudoku: Sudoku, cmd: Command, rawCmd: String, startSudoku: Sudoku): Either[String, Sudoku] = cmd match {
     case Insert(rowIx, colIx, value) =>
       if (cellIsEmpty(startSudoku, rowIx, colIx)) {
@@ -101,6 +104,21 @@ object PlaySudoku {
       } else {
         Left(s"${RED}Deletion could not be completed with command: $rawCmd. (u_u) The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, that was empty at the beginning of the game. Please try something else.$RESET")
       }
+    case Restart() =>
+      println("Are you sure you want to restart? If you do, all your progress will be lost (ToT).")
+      println("Write in 'y' if you want ro restart. If you do not want to restart write in: 'n'")
+      val response = readLine()
+      response.toList match {
+        case 'y' :: Nil =>
+          println("Restarting the game.")
+          Right(startSudoku)
+        case 'n' :: Nil =>
+          println("Resuming to the previous state the game.")
+          Right(curSudoku)
+        case _ =>
+          println(s"${RED} Your command:$response was not understood, therefore you are resuming to the previous state the game $RESET.")
+          Right(curSudoku)
+      }
     case _ => Left(s"${RED}Unimplemented exec command$RESET")
   }
 
@@ -118,7 +136,7 @@ object PlaySudoku {
       println("2nd char => number of the row in which the action should be done (needed for insertion and deletion)")
       println("3rd char => number of the column in which the action should be done (needed for insertion and deletion)")
       println("4th char => the value with which the action should be done (needed for insertion)")
-      println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, example 3: r = reset original sudoku.")
+      println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, example 3: r = restart original sudoku.")
 
       val rawCmdStr = readLine()
       val cmdParsingRes = parseCommand(rawCmdStr)
