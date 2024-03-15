@@ -24,17 +24,17 @@ object PlaySudoku {
   def cellIsEmpty(sudoku: Sudoku, row: Int, column: Int): Boolean = {
     sudoku.rows(row)(column).isEmpty
   }
-  def checkLevelInst(inst: String): Either[String, Sudoku] = inst.toList match {
-    case '1' :: Nil =>
+  def checkLevelInst(inst: String): Either[String, Sudoku] = inst match {
+    case "1" =>
       println("You have chosen Easy level.")
       Right(generateEasySudoku(generateNonRandomSolvedSudoku(0, 0)))
-    case '2' :: Nil =>
+    case "2" =>
       println("You have chosen Medium level.")
       Right(generateMediumSudoku(generateNonRandomSolvedSudoku(0, 0)))
-    case '3' :: Nil =>
+    case "3" =>
       println("You have chosen Hard level.")
       Right(generateHardSudoku(generateNonRandomSolvedSudoku(0, 0)))
-    case _          =>
+    case _   =>
       Left(s"${RED}Invalid level requested: $inst. Please write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard $RESET"
       )
   }
