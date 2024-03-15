@@ -113,8 +113,8 @@ object Misc{
 
   }
 
-  def colorMsg(color: String, msg: String): String =
-    color + msg + "\u001b[0m"
+  def printColoredMsg(color: String, msg: String): Unit =
+    println(color + msg + "\u001b[0m")
 
 }
 
