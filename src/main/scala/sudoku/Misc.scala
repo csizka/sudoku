@@ -83,6 +83,24 @@ object Misc{
 
   def numToIndex(num: Int): Int = num - 1
 
+  def execUndoTailRec(curSudoku: Sudoku, changes: CellHistory, numOfSteps: Int): (Either[String, Sudoku], CellHistory) = {
+    @tailrec
+    def execUndoHelper(curSudoku: Sudoku, changes: CellHistory): (Either[String, Sudoku], CellHistory) = changes match {
+      case (rowIx: Int, colIx: Int, value) +: rest =>
+        value match
+          case None =>
+            println(s"Deleting value in row: ${rowIx + 1}, column: ${colIx + 1}")
+            execUndoHelper(curSudoku.delete(rowIx, colIx), rest)
+          case Some(num) =>
+            println(s"Rewriting value: $num in row: ${rowIx + 1}, column: ${colIx + 1}")
+            execUndoHelper(curSudoku.insert(rowIx, colIx, num), rest)
+      case _ =>
+        (Right(curSudoku), changes.drop(numOfSteps))
+    }
+
+    execUndoHelper(curSudoku, changes.take(numOfSteps))
+  }
+
   @tailrec
   def fillCell(sudoku: Sudoku, name: String): Unit = {
     println("Here is your Sudoku: ")
@@ -110,7 +128,6 @@ object Misc{
       println(s"The cell you wanted to write into is not empty (>_<). Check row ${rowIndex + 1}, column ${columnIndex + 1}, and try again.")
       fillCell(sudoku, name)
     }
-
   }
 
   def printColoredMsg(color: String, msg: String): Unit =

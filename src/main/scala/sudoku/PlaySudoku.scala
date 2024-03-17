@@ -20,7 +20,11 @@ sealed trait Command
 case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
 case class Delete(rowIx: Int, colIx: Int) extends Command
 case class Restart() extends Command
-case class Undo(numOfSteps: Int, cmds: Vector[(Int, Int, Cell)]) extends Command
+case class Undo(numOfSteps: Int) extends Command
+case class Hint() extends Command
+case class
+
+type CellHistory = Vector[(Int, Int, Cell)]
 
 object PlaySudoku {
 
@@ -51,16 +55,16 @@ object PlaySudoku {
         println(error)
         generateSudoku()
     }
-    }
+  }
 
-  def parseCommand(inst: String, changes: Vector[(Int, Int, Cell)]): Either[String, Command] = inst.toList match {
+  def parseCommand(inst: String): Either[String, Command] = inst.toList match {
     case Nil => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
     case 'i' :: rest =>
       parseInsertCmd(rest)
     case 'd' :: rest =>
       parseDelCmd(rest)
     case 'u' :: rest =>
-      parseUndoCmd(rest, changes)
+      parseUndoCmd(rest)
     case 'r' :: Nil =>
       Right(Restart())
     case _ => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
@@ -68,6 +72,11 @@ object PlaySudoku {
 
   def ixIsValid(ix: Int): Boolean = {
     (0 to 8).contains(ix)
+  }
+
+  def updateCell(curSudoku: Sudoku, cellParams: (Int, Int, Cell)): Sudoku = cellParams match {
+    case (rowIx, colIx, value) =>
+      Sudoku(curSudoku.rows.updated(rowIx, curSudoku.rows(rowIx).updated(colIx, value)))
   }
 
   def parseInsertCmd(args: List[Char]): Either[String, Command] = args.map(x => x.toInt - 49) match {
@@ -89,15 +98,11 @@ object PlaySudoku {
       s"that was empty at the beginning of the game. Please try something else."
     )
   }
-  //TODO: should work for multi-digits as well
-  def parseUndoCmd(args: List[Char], changes: Vector[(Int, Int, Cell)]): Either[String, Command] = {
-    def stepCount = changes.size
+  //TODO: parse undo should only parse, exec to handle further investigation
+  def parseUndoCmd(args: List[Char]): Either[String, Command] = {
     Try(args.mkString.toInt).toOption match {
-      case Some(num) if num > stepCount =>
-        printColoredMsg(RED, "The number of steps you requested to undo is bigger, than the number of step you made, so the game will be restarted.")
-        Right(Restart())
       case Some(num) if 0 < num =>
-        Right(Undo(num, changes))
+        Right(Undo(num))
       case _ => Left(
         s"Undo could not be completed with command: u${args.mkString}. (u_u)" +
           s" The number after the letter 'u' needs to be between 1 and the number of steps already made. Please try something else."
@@ -106,8 +111,8 @@ object PlaySudoku {
   }
 
   @nowarn("msg=Unreachable case except for null")
-  def execCommand(curSudoku: Sudoku, cmd: Command, startSudoku: Sudoku, changes: Vector[(Int, Int, Cell)]):
-  (Either[String, Sudoku], Vector[(Int, Int, Cell)]) = cmd match {
+  def execCommand(curSudoku: Sudoku, cmd: Command, startSudoku: Sudoku, changes: CellHistory):
+  (Either[String, Sudoku], CellHistory) = cmd match {
     case Insert(rowIx, colIx, value) =>
       if (cellIsEmpty(startSudoku, rowIx, colIx)) {
         val nextSudoku = curSudoku.insert(rowIx, colIx, value)
@@ -127,7 +132,7 @@ object PlaySudoku {
           s"The 2 numbers after the letter 'd' need to be between 1 and 9, and they can only point to a cell, " +
           s"that was empty at the beginning of the game. Please try something else."), changes)
       }
-    case Undo(numOfSteps: Int, toReset: Vector[(Int, Int, Cell)]) =>
+    case Undo(numOfSteps: Int) =>
       execUndo(curSudoku, changes, numOfSteps)
     case Restart() =>
       println("Are you sure you want to restart? If you do, all your progress will be lost (ToT).")
@@ -146,25 +151,14 @@ object PlaySudoku {
     case _ => (Left("Unimplemented exec command"), changes)
   }
 
-  def execUndo(curSudoku:Sudoku, changes: Vector[(Int, Int, Cell)], numOfSteps: Int): (Either[String, Sudoku], Vector[(Int, Int, Cell)]) = {
-    @tailrec
-    def execUndoHelper(curSudoku: Sudoku, changes: Vector[(Int, Int, Cell)]): (Either[String, Sudoku], Vector[(Int, Int, Cell)]) = changes match {
-      case (rowIx: Int, colIx: Int, value) +: rest =>
-        value match
-          case None =>
-            println(s"Deleting value in row: ${rowIx + 1}, column: ${colIx + 1}")
-            execUndoHelper(curSudoku.delete(rowIx, colIx), rest)
-          case Some(num) =>
-            println(s"Rewriting value: $num in row: ${rowIx + 1}, column: ${colIx + 1}")
-            execUndoHelper(curSudoku.insert(rowIx, colIx, num), rest)
-      case _ =>
-        (Right(curSudoku), changes.drop(numOfSteps))
-    }
-    execUndoHelper(curSudoku, changes.take(numOfSteps))
+  def execUndo(curSudoku: Sudoku, changes: CellHistory, numOfSteps: Int): (Either[String, Sudoku], CellHistory) = {
+    val undoChanges = changes.take(numOfSteps)
+    val nextSudoku = undoChanges.foldLeft(curSudoku)(updateCell)
+    (Right(nextSudoku), changes.drop(numOfSteps))
   }
 
   @tailrec
-  def choosingNextMove(curSudoku: Sudoku, name: String, startSudoku: Sudoku, changes: Vector[(Int, Int, Cell)]): Sudoku = {
+  def choosingNextMove(curSudoku: Sudoku, name: String, startSudoku: Sudoku, changes: CellHistory): Sudoku = {
     if (isSudokuSolved(curSudoku)) {
       printColoredMsg(GREEN, s"Congrats $name, you have solved the Sudoku! (*.*) Look at how beautiful it is:")
       printColoredMsg(GREEN, pretty(curSudoku))
@@ -182,7 +176,7 @@ object PlaySudoku {
         "example 3: r = restart original sudoku, example 4: u3 = undo the last 3 steps.")
 
       val rawCmdStr = readLine()
-      val cmdParsingRes = parseCommand(rawCmdStr, changes)
+      val cmdParsingRes = parseCommand(rawCmdStr)
 
       cmdParsingRes match {
         case Right(cmd) =>

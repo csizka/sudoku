@@ -13,11 +13,14 @@ type Row = Vector[Cell]
 type Column = Vector[Cell]
 type Block = Vector[Cell]
 case class Sudoku(rows: Vector[Row]) {
+  def update(rowIx: Int, colIx: Int, value: Cell): Sudoku = {
+    Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, value)))
+  }
   def insert(rowIx: Int, colIx: Int, value: Int): Sudoku = {
-    Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, Some(value))))
+    update(rowIx, colIx, Some(value))
   }
   def delete(rowIx: Int, colIx: Int): Sudoku = {
-    Sudoku(rows.updated(rowIx, rows(rowIx).updated(colIx, None)))
+    update(rowIx, colIx, None)
   }
 
   // TODO: make deterministic by instantiating scala.util.Random with a predefined seed (also add seed param for this fun)
@@ -68,10 +71,6 @@ object Sudoku {
           }.toVector
         }.toVector
     )
-  }
-
-  def giveHint(sudoku: Sudoku): Unit = {
-
   }
 
 }
