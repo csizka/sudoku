@@ -4,6 +4,8 @@ package sudoku
 import sudoku.PlaySudoku.*
 import sudoku.Pretty.pretty
 import sudoku.Validation.*
+import sudoku.Solving.*
+import sudoku.Examples.*
 
 import scala.annotation.tailrec
 import scala.io.AnsiColor
@@ -24,7 +26,6 @@ def isRowRepetitive(sudoku: Sudoku, index: Int): String = {
   if (areCellsRepetitionFree(sudoku.rows(index))) "not repetitive"
   else "repetitive"
 }
-
 
 object Misc{
   def guessingGame(): Unit = {
@@ -133,5 +134,8 @@ object Misc{
   def printColoredMsg(color: String, msg: String): Unit =
     println(color + msg + "\u001b[0m")
 
+  def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
+    collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
+  }
 }
 

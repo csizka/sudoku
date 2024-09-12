@@ -114,9 +114,4 @@ object Examples {
       v.slice(72, 81).map(x => Some(x)),
     )
   )
-
-  
-
-
-
 }

@@ -9,8 +9,6 @@ import scala.util.*
 
 import scala.annotation.tailrec
 
-// TODO: separate solving algo from validation and move to new file
-
 object Validation {
 
   //Row Tests
@@ -44,7 +42,7 @@ object Validation {
   def allRowsRepetitionFree(sudoku: Sudoku): Boolean = {
     sudoku.rows.forall(areCellsRepetitionFree)
   }
-
+  
   // Column tests
   def getNthColumn(sudoku: Sudoku, n: Int): Row = {
     if (0 <= n && n <= 8)
@@ -89,13 +87,13 @@ object Validation {
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
   
-  def getAllBlocks(sudoku: Sudoku): Vector[Column] = {
+  def getAllBlocks(sudoku: Sudoku): Vector[Block] = {
     if (sudoku.rows.nonEmpty) {
       sudoku.rows.indices
         .map(n => getNthBlock(sudoku, n))
         .toVector
     }
-    else Vector.empty[Column]
+    else Vector.empty[Block]
   }
   
   def areAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {

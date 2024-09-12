@@ -8,7 +8,7 @@ import sudoku.Solving.*
 
 import PlaySudoku.*
 import Generate.*
-import junicamp.sudoku.PlaySudokuTests.emptyHistory
+import sudoku.PlaySudokuTests.emptyHistory
 import utest.*
 
 import scala.jdk.CollectionConverters.*
@@ -95,7 +95,7 @@ object PlaySudokuTests extends TestSuite {
       assertMatch(parseCommand("u2")) {
         case Right(Undo(2)) => ()
       }
-    }
+    }  
     test("execCommand") {
       test("insertion") {
         test("invalid"){

@@ -6,29 +6,32 @@ import sudoku.Solving.*
 import sudoku.Sudoku.*
 import sudoku.Examples.*
 
-import junicamp.sudoku.Generate.countSolutions
+import sudoku.Generate.countSolutions
 
 import scala.util.Random
 import scala.annotation.tailrec
 
-// TODO: make generation deterministic by adding seeds to functions
-// val rnd = new Random(rndSeed)
-// val rdnNum - rnd.nextInt
 object Generate {
 
-  def generateSolvedSudoku(): Sudoku = {
-    val startSudoku = emptySudoku.insert(Random.nextInt(9), Random.nextInt(9), Random.nextInt(8) + 1)
+  val rand = new Random(System.nanoTime())
+  
+  def generateSolvedSudoku(row: Int, column: Int): Sudoku = {
+    val startSudoku = emptySudoku.insert(row, column, rand.nextInt(9) + 1)
+    finishSudoku(startSudoku).get
+  }
 
-    finishSudoku(startSudoku).get
+  def deleteRandomCell(sudoku: Sudoku): Sudoku = {
+    def deleteHelper(rowIx: Int, colIx: Int, value: Option[Int]): Sudoku = {
+      Sudoku(sudoku.rows.updated(rowIx, sudoku.rows(rowIx).updated(colIx, value)))
+    }
+
+    deleteHelper(rand.nextInt(9), rand.nextInt(9), None)
   }
-  def generateNonRandomSolvedSudoku(row: Int, column: Int): Sudoku = {
-    val startSudoku = emptySudoku.insert(row, column, Random.nextInt(8) + 1)
-    finishSudoku(startSudoku).get
-  }
+
   def generateEasySudoku(sudoku: Sudoku): Sudoku = {
     @tailrec
     def easyHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
+      val curSudoku = deleteRandomCell(sudoku)
       if (numOfEmptyCells(curSudoku) <= 20 && countSolutions(curSudoku) == 1) easyHelper(curSudoku)
       else sudoku
     }
@@ -39,60 +42,38 @@ object Generate {
   def generateMediumSudoku(sudoku: Sudoku): Sudoku = {
     @tailrec
     def mediumHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
+      val curSudoku = deleteRandomCell(sudoku)
       if (numOfEmptyCells(curSudoku) <= 30 && countSolutions(curSudoku) == 1) mediumHelper(curSudoku)
       else sudoku
     }
 
-    mediumHelper(sudoku.deleteRandomCell().deleteRandomCell())
+    mediumHelper(deleteRandomCell(deleteRandomCell(sudoku)))
   }
 
   def generateHardSudoku(sudoku: Sudoku): Sudoku = {
     @tailrec
     def hardHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
-      if (numOfEmptyCells(curSudoku) <= 40 && countSolutions(curSudoku) == 1) hardHelper(curSudoku)
+      val curSudoku = deleteRandomCell(sudoku)
+      if (countSolutions(curSudoku) == 1) hardHelper(curSudoku)
       else sudoku
     }
-    hardHelper(sudoku.deleteRandomCell().deleteRandomCell())
-  }
-  def generateTheHardestSudoku(sudoku: Sudoku): Sudoku = {
-    @tailrec
-    def hardestHelper(sudoku: Sudoku): Sudoku = {
-      val curSudoku = sudoku.deleteRandomCell()
-      if (numOfEmptyCells(curSudoku) <= 60 && countSolutions(curSudoku) == 1) hardestHelper(curSudoku)
-      else sudoku
-    }
-    hardestHelper(sudoku.deleteRandomCell().deleteRandomCell())
+    hardHelper(deleteRandomCell(deleteRandomCell(sudoku)))
   }
 
   def countSolutions(sudoku: Sudoku): Int = {
     @tailrec
-    def countSudokuHelper(lstOfSudoku: List[Sudoku], resSet: Set[Sudoku]): Int = {
-      if (lstOfSudoku.nonEmpty) {
-        val curSudoku = lstOfSudoku.head
-        val restSudokus = lstOfSudoku.drop(1)
-        val cellsToFill = collectEmptyCellCoords(curSudoku).filter { case (x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) > 0 }
+    def countSudokuHelper(lstOfSudoku: List[Sudoku], resSet: Set[Sudoku]): Int = lstOfSudoku match {
+      case curSudoku :: restSudokus =>
+        val singleChoicesFilled = fillCellsWithSingleChoicesRepeatedly(curSudoku)
+        val cellsToFill = collectEmptyCellCoords(singleChoicesFilled).filter { case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) > 0 }
         if (cellsToFill.nonEmpty)
-          val singleChoices = cellsToFill.filter((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y) == 1)
-          if (singleChoices.nonEmpty)
-            countSudokuHelper(fillCellsWithSingleChoices(curSudoku) +: restSudokus, resSet)
-          else {
-            val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(curSudoku, x, y))
-            countSudokuHelper(calcNextSteps(curSudoku, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
-          }
-        else if (isSudokuSolved(curSudoku))
-          countSudokuHelper(restSudokus, resSet + curSudoku)
+            val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
+            countSudokuHelper(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
+        else if (isSudokuSolved(singleChoicesFilled))
+          countSudokuHelper(restSudokus, resSet + singleChoicesFilled)
         else countSudokuHelper(restSudokus, resSet)
-      } else resSet.size
+      case Nil => resSet.size
     }
-
     countSudokuHelper(List(sudoku), Set.empty[Sudoku])
   }
-
-  def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
-    collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
-  }
-
-
 }

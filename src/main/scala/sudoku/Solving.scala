@@ -40,10 +40,14 @@ object Solving {
     possibleSolutionsForCell(sudoku, row, col).toList.map(x => sudoku.insert(row, col, x))
   }
 
-  def fillCellsWithSingleChoices(sudoku: Sudoku): Sudoku = {
+  def cellsWithSingleChoices(sudoku: Sudoku): List[(Int, Int, Int)] = {
     collectEmptyCellCoords(sudoku)
       .map { case (x, y) => (x, y, possibleSolutionsForCell(sudoku, x, y).toList) }
       .collect { case (x, y, List(singlePossibleValue)) => (x, y, singlePossibleValue) }
+  }
+
+  def fillCellsWithSingleChoices(sudoku: Sudoku): Sudoku = {
+    cellsWithSingleChoices(sudoku)
       .foldLeft(sudoku) { case (accCur: Sudoku, (x, y, singlePossibleValue)) =>
         accCur.insert(x, y, singlePossibleValue)
       }

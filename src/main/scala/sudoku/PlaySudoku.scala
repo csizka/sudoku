@@ -9,6 +9,8 @@ import scala.io.AnsiColor.*
 import scala.jdk.CollectionConverters.*
 import sudoku.Sudoku.*
 import sudoku.Examples.*
+import sudoku.Validation.*
+import sudoku.Solving.*
 
 import Pretty.*
 import Generate.*
@@ -21,8 +23,8 @@ case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
 case class Delete(rowIx: Int, colIx: Int) extends Command
 case class Restart() extends Command
 case class Undo(numOfSteps: Int) extends Command
+case class Finish() extends Command
 case class Hint() extends Command
-case class
 
 type CellHistory = Vector[(Int, Int, Cell)]
 
@@ -31,16 +33,82 @@ object PlaySudoku {
   def cellIsEmpty(sudoku: Sudoku, row: Int, column: Int): Boolean = {
     sudoku.rows(row)(column).isEmpty
   }
+
+  def definedCells(sudoku: Sudoku): Map[Int, Vector[(Int, Int)]] = {
+    val coords = for {
+      rowIx <- 0 to 8
+      colIx <- 0 to 8
+    } yield (rowIx, colIx)
+    coords
+      .toVector
+      .filter((rowIx, colIx) => sudoku.rows(rowIx)(colIx).isDefined)
+      .groupBy { case (rowIx, colIx) => sudoku.rows(rowIx)(colIx).get}
+  }
+
+  def nthRowRepetitiveCoords(rowIx: Int, sudoku: Sudoku): Vector[Coord]  = {
+    (0 to 8)
+      .toVector
+      .flatMap(colIx => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
+      .groupMap(_._1)(_._2)
+      .filter(_._2.size > 1)
+      .values
+      .toVector
+      .flatten
+  }
+
+  def nthColRepetitiveCoords(colIx: Int, sudoku: Sudoku): Vector[(Int, Int)] = {
+    {0 to 8}
+      .toVector
+      .flatMap(rowIx => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
+      .groupMap(_._1)(_._2)
+      .filter(_._2.size > 1)
+      .values
+      .toVector
+      .flatten
+  }
+
+  def nthBlockRepetitiveCoords(blockIx: Int, sudoku: Sudoku): Vector[(Int, Int)] = {
+    val firstRow = blockIx / 3 * 3
+    val firstCol = blockIx % 3 * 3
+    val blockCoords = for {
+      rowIx <- Vector(firstRow, firstRow + 1, firstRow + 2)
+      colIx <- Vector(firstCol, firstCol + 1, firstCol + 2)
+    } yield (rowIx, colIx)
+    blockCoords.flatMap((rowIx, colIx) => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
+      .groupMap(_._1)(_._2)
+      .filter(_._2.size > 1)
+      .values
+      .toVector
+      .flatten
+  }
+
+  def allRepetitiveCoords(sudoku: Sudoku): Vector[(Int, Int)] = {
+    {0 to 8}
+      .toVector
+      .flatMap { index =>
+        nthRowRepetitiveCoords(index, sudoku) ++
+          nthColRepetitiveCoords(index, sudoku) ++
+          nthBlockRepetitiveCoords(index, sudoku)
+      }.distinct
+  }
+
+  def repetitionsByRows(sudoku: Sudoku): Map[Int, Set[Int]] = {
+    val finalMap = allRepetitiveCoords(sudoku).foldLeft(Map[Int, Set[Int]]()) { case (curMap, (rowIx, colIx)) =>
+      curMap + (rowIx -> (curMap.getOrElse(rowIx, Set()) + colIx))
+    }
+    finalMap
+  }
+
   def checkLevelInst(inst: String): Either[String, Sudoku] = inst match {
     case "1" =>
       println("You have chosen Easy level.")
-      Right(generateEasySudoku(generateNonRandomSolvedSudoku(0, 0)))
+      Right(generateEasySudoku(generateSolvedSudoku(0, 0)))
     case "2" =>
       println("You have chosen Medium level.")
-      Right(generateMediumSudoku(generateNonRandomSolvedSudoku(0, 0)))
+      Right(generateMediumSudoku(generateSolvedSudoku(0, 0)))
     case "3" =>
       println("You have chosen Hard level.")
-      Right(generateHardSudoku(generateNonRandomSolvedSudoku(0, 0)))
+      Right(generateHardSudoku(generateSolvedSudoku(0, 0)))
     case _   =>
       Left(s"Invalid level requested: $inst. Please write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard"
       )
@@ -65,8 +133,12 @@ object PlaySudoku {
       parseDelCmd(rest)
     case 'u' :: rest =>
       parseUndoCmd(rest)
+    case 'f' :: Nil =>
+      Right(Finish())
     case 'r' :: Nil =>
       Right(Restart())
+    case 'h' :: Nil =>
+      Right(Hint())
     case _ => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
   }
 
@@ -98,7 +170,6 @@ object PlaySudoku {
       s"that was empty at the beginning of the game. Please try something else."
     )
   }
-  //TODO: parse undo should only parse, exec to handle further investigation
   def parseUndoCmd(args: List[Char]): Either[String, Command] = {
     Try(args.mkString.toInt).toOption match {
       case Some(num) if 0 < num =>
@@ -133,7 +204,25 @@ object PlaySudoku {
           s"that was empty at the beginning of the game. Please try something else."), changes)
       }
     case Undo(numOfSteps: Int) =>
-      execUndo(curSudoku, changes, numOfSteps)
+      val numOfChanges = changes.length
+      if (numOfChanges == 0) {
+        (Left(s"There are no steps to undo, choose some other action. (-.-)"), changes)
+      } else if (numOfChanges - numOfSteps >= 0) {
+        execUndo(curSudoku, changes, numOfSteps)
+      } else {
+        println(RED + s"You cannot undo more steps than the number of changes you did, therefore $numOfChanges steps will be undone. (x_x)" + "\u001B[0m")
+        execUndo(curSudoku, changes, numOfChanges)
+      }
+    case Finish() =>
+      if (!isSudokuRepetitionFree(curSudoku)) {
+        (Left(s"The Sudoku can not be finished, it contains at least 1 repetition (°o°) " +
+          s"please check the repetition."), changes)
+      } else if (isSudokuRepetitionFree(curSudoku) && finishSudoku(curSudoku).isEmpty) {
+        (Left(s"There is no repetition, but at least one value is entered to the wrong cell (>_<) " +
+          s"please restart the game or undo until it becomes solvable."), changes)
+      } else {
+        (Right(finishSudoku(curSudoku).get), changes)
+      }
     case Restart() =>
       println("Are you sure you want to restart? If you do, all your progress will be lost (ToT).")
       println("Write in 'y' if you want ro restart. If you do not want to restart write in: 'n'")
@@ -148,6 +237,24 @@ object PlaySudoku {
         case _   =>
           (Left(s"Your command:$response was not understood, therefore you are resuming to the previous state the game."), changes)
       }
+    case Hint() =>
+      if (isSudokuRepetitionFree(curSudoku)) {
+        cellsWithSingleChoices(curSudoku) match {
+          case (rowIx, colIx, value) :: rest =>
+            println(GREEN + s"In row ${rowIx + 1}, column ${colIx + 1} only 1 value can be written:" +
+              s"$value to avoid repetition." + "\u001B[0m")
+            (Right(curSudoku), changes)
+          case Nil =>
+            val coords = collectEmptyCellCoords(curSudoku)
+              .minBy{ case (rowIx, colIx) => numOfPossibleSolutionsForCell(curSudoku, rowIx, colIx) }
+            val possibleVals = possibleSolutionsForCell(curSudoku, coords._1, coords._2)
+            println(GREEN + s"At this pont to row ${coords._1 + 1}, column ${coords._1 + 1} only one of the following numbers can be written: $possibleVals"
+              + "\u001B[0m")
+            (Right(curSudoku), changes)
+        }
+      } else {
+        (Left("First make sure your Sudoku is repetition free."), changes)
+      }
     case _ => (Left("Unimplemented exec command"), changes)
   }
 
@@ -157,23 +264,34 @@ object PlaySudoku {
     (Right(nextSudoku), changes.drop(numOfSteps))
   }
 
+  def instructions(): Unit = {
+    println("Write down your next move in the following format:")
+    println("1st char => action: i = insert, d = delete, r = restart, u = undo, f = finish, h = hint")
+    println("2nd char => number of the row in which the action should be done (needed for insertion and deletion) " +
+      "OR the number of steps that should be undone (needed for undo)")
+    println("3rd char => number of the column in which the action should be done (needed for insertion and deletion)")
+    println("4th char => the value with which the action should be done (needed for insertion)")
+    println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, " +
+      "example 3: r = restart original sudoku, example 4: u3 = undo the last 3 steps, 5: f = finish sudoku, 6: h = give me a hint.")
+  }
   @tailrec
   def choosingNextMove(curSudoku: Sudoku, name: String, startSudoku: Sudoku, changes: CellHistory): Sudoku = {
+
     if (isSudokuSolved(curSudoku)) {
       printColoredMsg(GREEN, s"Congrats $name, you have solved the Sudoku! (*.*) Look at how beautiful it is:")
       printColoredMsg(GREEN, pretty(curSudoku))
       curSudoku
     } else {
-      println("Here is the current state of your Sudoku:")
-      println(pretty(curSudoku))
-      println("Write down your next move in the following format:")
-      println("1st char => action: i = insert, d = delete, r = restart, u = undo")
-      println("2nd char => number of the row in which the action should be done (needed for insertion and deletion) " +
-        "OR the number of steps that should ne undone (needed for undo)")
-      println("3rd char => number of the column in which the action should be done (needed for insertion and deletion)")
-      println("4th char => the value with which the action should be done (needed for insertion)")
-      println("Example 1: i231 = insert the value 1 to row 2 column 3, example 2: d67 = delete the value of row 6 column 7, " +
-        "example 3: r = restart original sudoku, example 4: u3 = undo the last 3 steps.")
+      val repCoordsByRow = repetitionsByRows(curSudoku)
+      if (repCoordsByRow.isEmpty) {
+        println("Here is the current state of your Sudoku:")
+        println(pretty(curSudoku))
+      } else {
+        println(RED + "Here is the current state of your Sudoku. All the repetitions in the rows, columns and blocks can be found highlighted with red below: (°-°)" +
+          "\u001B[0m")
+        println(prettyColours(curSudoku, RED, repCoordsByRow))
+      }
+      instructions()
 
       val rawCmdStr = readLine()
       val cmdParsingRes = parseCommand(rawCmdStr)
@@ -199,7 +317,7 @@ object PlaySudoku {
     val name = readLine()
     println(s"Hi $name, write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard (OuO)")
     val sudoku = generateSudoku()
-    choosingNextMove(sudoku, name, sudoku, Vector.empty[(Int,Int,Cell)])
+    choosingNextMove(sudoku, name, sudoku, Vector[(Int,Int,Cell)]())
   }
 
 }
