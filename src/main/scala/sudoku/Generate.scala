@@ -14,9 +14,16 @@ import scala.annotation.tailrec
 object Generate {
 
   val rand = new Random(System.nanoTime())
-  
+
   def generateSolvedSudoku(row: Int, column: Int): Sudoku = {
     val startSudoku = emptySudoku.insert(row, column, rand.nextInt(9) + 1)
+    finishSudoku(startSudoku).get
+  }
+
+  def generateControlledSudoku(coords: Vector[(Int, Int)]): Sudoku = {
+    val startSudoku = coords.foldLeft(emptySudoku) { case (curSudoku, (rowIx, colIx)) =>
+      curSudoku.insert(rowIx, colIx, rand.nextInt(9) + 1)
+    }
     finishSudoku(startSudoku).get
   }
 
@@ -65,12 +72,14 @@ object Generate {
     def countSudokuHelper(lstOfSudoku: List[Sudoku], resSet: Set[Sudoku]): Int = lstOfSudoku match {
       case curSudoku :: restSudokus =>
         val singleChoicesFilled = fillCellsWithSingleChoicesRepeatedly(curSudoku)
-        val cellsToFill = collectEmptyCellCoords(singleChoicesFilled).filter { case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) > 0 }
-        if (cellsToFill.nonEmpty)
-            val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
-            countSudokuHelper(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
-        else if (isSudokuSolved(singleChoicesFilled))
+        val emptyCells = collectEmptyCellCoords(singleChoicesFilled)
+        val sudokuIsUnsolvable = emptyCells.exists{ case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) == 0} ||
+          !isSudokuRepetitionFree(singleChoicesFilled)
+        if (isSudokuSolved(singleChoicesFilled))
           countSudokuHelper(restSudokus, resSet + singleChoicesFilled)
+        else if (!sudokuIsUnsolvable)
+            val cellToFill = emptyCells.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
+            countSudokuHelper(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus, resSet)
         else countSudokuHelper(restSudokus, resSet)
       case Nil => resSet.size
     }

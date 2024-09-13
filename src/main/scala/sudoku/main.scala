@@ -20,7 +20,8 @@ import scala.util.Random
 
 @main
 def main(): Unit = {
-//println(pretty(generateTheHardestSudoku(generateSolvedSudoku())))
+//println(pretty(generateControlledSudoku(Vector((0,0), (2,6), (3,1), (4,4), (7,5), (8,8)))))
+
 playSudoku()
 //println(prettyColours(goodSudoku, GREEN,Vector((1,1))))
 //println(pretty(prettyColourRow(prettyList(goodSudoku), 8, Set(1,6,7,8), YELLOW)))

@@ -115,8 +115,7 @@ object PlaySudoku {
   }
 
   @tailrec
-  def generateSudoku(): Sudoku = {
-    val level = readLine()
+  def generateSudoku(level: String = readLine()): Sudoku = {
     checkLevelInst(level) match {
       case Right(sudoku) => sudoku
       case Left(error) =>
@@ -210,7 +209,7 @@ object PlaySudoku {
       } else if (numOfChanges - numOfSteps >= 0) {
         execUndo(curSudoku, changes, numOfSteps)
       } else {
-        println(RED + s"You cannot undo more steps than the number of changes you did, therefore $numOfChanges steps will be undone. (x_x)" + "\u001B[0m")
+        printColoredMsg(RED, s"You cannot undo more steps than the number of changes you did, therefore $numOfChanges steps will be undone. (x_x)")
         execUndo(curSudoku, changes, numOfChanges)
       }
     case Finish() =>
@@ -241,15 +240,14 @@ object PlaySudoku {
       if (isSudokuRepetitionFree(curSudoku)) {
         cellsWithSingleChoices(curSudoku) match {
           case (rowIx, colIx, value) :: rest =>
-            println(GREEN + s"In row ${rowIx + 1}, column ${colIx + 1} only 1 value can be written:" +
-              s"$value to avoid repetition." + "\u001B[0m")
+            printColoredMsg(GREEN, s"In row ${rowIx + 1}, column ${colIx + 1} only value '$value' can be written to avoid repetition.")
             (Right(curSudoku), changes)
           case Nil =>
             val coords = collectEmptyCellCoords(curSudoku)
               .minBy{ case (rowIx, colIx) => numOfPossibleSolutionsForCell(curSudoku, rowIx, colIx) }
             val possibleVals = possibleSolutionsForCell(curSudoku, coords._1, coords._2)
-            println(GREEN + s"At this pont to row ${coords._1 + 1}, column ${coords._1 + 1} only one of the following numbers can be written: $possibleVals"
-              + "\u001B[0m")
+            printColoredMsg(GREEN, s"At this point to row ${coords._1 + 1}, column ${coords._1 + 1} only one of the following" +
+              s" numbers can be written: $possibleVals")
             (Right(curSudoku), changes)
         }
       } else {
@@ -287,8 +285,7 @@ object PlaySudoku {
         println("Here is the current state of your Sudoku:")
         println(pretty(curSudoku))
       } else {
-        println(RED + "Here is the current state of your Sudoku. All the repetitions in the rows, columns and blocks can be found highlighted with red below: (°-°)" +
-          "\u001B[0m")
+        printColoredMsg(RED, "Here is the current state of your Sudoku. All the repetitions in the rows, columns and blocks can be found highlighted with red below: (°-°)")
         println(prettyColours(curSudoku, RED, repCoordsByRow))
       }
       instructions()

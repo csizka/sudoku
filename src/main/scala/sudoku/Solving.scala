@@ -2,6 +2,7 @@ package junicamp
 package sudoku
 
 import sudoku.Validation.*
+import Pretty.*
 
 import scala.annotation.tailrec
 
@@ -68,17 +69,16 @@ object Solving {
     case Nil => List.empty
     case curSudoku :: restSudokus =>
       val singleChoicesFilled = fix(fillCellsWithSingleChoices)(curSudoku)
-      val cellsToFill = collectEmptyCellCoords(singleChoicesFilled).filter { case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) > 0 }
-
-      val noMoreCellsToFill = cellsToFill.isEmpty
+      val emptyCells = collectEmptyCellCoords(singleChoicesFilled)
+      val sudokuIsUnsolvable = emptyCells.exists{ case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) == 0} ||
+        !isSudokuRepetitionFree(singleChoicesFilled)
       lazy val sudokuIsSolved = isSudokuSolved(singleChoicesFilled)
-
-      if (noMoreCellsToFill && sudokuIsSolved) {
+      if (sudokuIsSolved) {
         List(singleChoicesFilled)
-      } else if (noMoreCellsToFill && !sudokuIsSolved) {
+      } else if (sudokuIsUnsolvable) {
         calcLogicalNextSteps(restSudokus)
       } else {
-        val cellToFill = cellsToFill.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
+        val cellToFill = emptyCells.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
         calcLogicalNextSteps(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus)
       }
   }

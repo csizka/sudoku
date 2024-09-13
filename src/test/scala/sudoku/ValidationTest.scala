@@ -5,7 +5,7 @@ import sudoku.Examples.*
 import sudoku.Validation.*
 import sudoku.Sudoku.*
 import sudoku.Solving.*
-
+import sudoku.Misc.*
 import Generate.*
 import utest.*
 
@@ -40,6 +40,8 @@ object ValidationTest extends TestSuite {
         areCellsRepetitionFree(goodSudoku.rows(0)) ==> true
         val filledRepetitiveRow = Vector(1, 2, 3, 4, 5, 6, 8, 8, 9).map(x => Some(x))
         areCellsRepetitionFree(filledRepetitiveRow) ==> false
+        allRowsRepetitionFree(goodSudoku) ==> true
+        allRowsRepetitionFree(notGoodSudoku) ==> false
       }
       test("areCellsFilled"){
         val filledValidRow = Vector(1, 2, 3, 4, 5, 6, 7, 8).map(x => Some(x)) :+ Some(1)
@@ -141,15 +143,18 @@ object ValidationTest extends TestSuite {
         println("sudoku deleted")
       }
       testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
+
+
+
+
+
+
+
+
+
       testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
       testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }
-    test("playSudoku"){
-
-
-    }
-
-
 
   }
 }
