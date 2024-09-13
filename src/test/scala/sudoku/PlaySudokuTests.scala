@@ -15,6 +15,7 @@ import scala.jdk.CollectionConverters.*
 
 object PlaySudokuTests extends TestSuite {
   val emptyHistory = Vector.empty[(Int, Int, Cell)]
+  val nonEmptyHistory = Vector((0,0,Some(1)), (0,0,None), (0,0,Some(1)), (0,0,None))
   val tests = Tests {
     test("parseInsertCmd"){
       assertMatch(parseInsertCmd("53".toList)) {
@@ -57,6 +58,9 @@ object PlaySudokuTests extends TestSuite {
       assertMatch(parseUndoCmd("14".toList)) {
         case Right(Undo(14)) => ()
       }
+      assertMatch(parseUndoCmd("f4".toList)) {
+        case Left(err: String) => ()
+      }
     }
     test("parseCommand"){
       assertMatch(parseCommand("53")) {
@@ -74,7 +78,16 @@ object PlaySudokuTests extends TestSuite {
       assertMatch(parseCommand("d4")) {
         case Left(err: String) => ()
       }
+      assertMatch(parseCommand("r4")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("h0")) {
+        case Left(err: String) => ()
+      }
       assertMatch(parseCommand("d765")) {
+        case Left(err: String) => ()
+      }
+      assertMatch(parseCommand("f3")) {
         case Left(err: String) => ()
       }
       assertMatch(parseCommand("i2345")) {
@@ -89,13 +102,22 @@ object PlaySudokuTests extends TestSuite {
       assertMatch(parseCommand("i958")) {
         case Right(Insert(8, 4, 8)) => ()
       }
+      assertMatch(parseCommand("r")) {
+        case Right(Restart()) => ()
+      }
+      assertMatch(parseCommand("f")) {
+        case Right(Finish()) => ()
+      }
+      assertMatch(parseCommand("h")) {
+        case Right(Hint()) => ()
+      }
       assertMatch(parseCommand("u958")) {
         case Right(Undo(958)) => ()
       }
       assertMatch(parseCommand("u2")) {
         case Right(Undo(2)) => ()
       }
-    }  
+    }
     test("execCommand") {
       test("insertion") {
         test("invalid"){
@@ -140,16 +162,37 @@ object PlaySudokuTests extends TestSuite {
         }
       }
       test("undo"){
-        test{"valid"}{
+        test("invalid") {
           assertMatch(execCommand(testingSudoku, Undo(5), testingSudoku, emptyHistory)) {
-            case (Right(x: Sudoku), emptyHistory) if x == testingSudoku => ()
+            case (Left(err: String), emptyHistory) if err.contains("There are no steps to undo") => ()
           }
-          assertMatch(execCommand(testingSudoku, Undo(7), emptySudoku, Vector((0, 7, None), (8, 8, Some(9))))) {
-            case (Right(x: Sudoku), emptyHistory) if x == testingSudoku.delete(0, 7).insert(8, 8, 9) => ()
+        }
+        test("valid") {
+          assertMatch(execCommand(emptySudoku.insert(0,0,2), Undo(5), emptySudoku, nonEmptyHistory)) {
+            case (Right(x: Sudoku), emptyHistory) if x == emptySudoku => ()
+          }
+          assertMatch(execCommand(emptySudoku.insert(0,0,2), Undo(1), emptySudoku, Vector((0, 0, Some(1))))) {
+            case (Right(x: Sudoku), emptyHistory) if x == emptySudoku.insert(0,0,1) => ()
           }
           assertMatch(execCommand(testingSudoku, Undo(1), emptySudoku, Vector((1, 1, None), (0, 0, None)))) {
             case (Right(x: Sudoku), Vector((0, 0, None))) if x == testingSudoku.delete(1, 1) => ()
           }
+        }
+      }
+      test("hint") {
+        assertMatch(execCommand(testingSudoku, Hint(), emptySudoku, nonEmptyHistory)) {
+          case (Right(x: Sudoku), nonEmptyHistory) if x == testingSudoku => ()
+        }
+        assertMatch(execCommand(emptySudoku, Hint(), emptySudoku, emptyHistory)) {
+          case (Right(x: Sudoku), emptyHistory) if x == emptySudoku => ()
+        }
+      }
+      test("finish") {
+        assertMatch(execCommand(someCellMissingSudoku, Finish(), emptySudoku, nonEmptyHistory)) {
+          case (Right(x: Sudoku), nonEmptyHistory) if x == goodSudoku => ()
+        }
+        assertMatch(execCommand(emptySudoku, Finish(), emptySudoku, emptyHistory)) {
+          case (Right(x: Sudoku), emptyHistory) if isSudokuSolved(x) => ()
         }
       }
     }

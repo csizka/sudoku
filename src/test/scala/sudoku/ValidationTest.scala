@@ -51,7 +51,6 @@ object ValidationTest extends TestSuite {
         val eighthBlock = Vector(Some(2), Some(8), Some(4), Some(6), Some(3), Some(5), Some(1), Some(7), Some(9))
         getNthBlockV2(goodSudoku, 8) ==> eighthBlock
       }
-
     }
 
     test("solver"){
@@ -65,6 +64,7 @@ object ValidationTest extends TestSuite {
         countSolutions(oneCellMissingSudoku) ==> 1
         countSolutions(partiallySolvedGoodSudoku) ==> 1
         countSolutions(goodSudoku) ==> 1
+        countSolutions(notGoodSudoku) ==> 0
       }
       test("possibleSolutions"){
         possibleSolutionsForCell(partiallySolvedGoodSudoku, 6, 1) ==> Set(6)
@@ -90,9 +90,12 @@ object ValidationTest extends TestSuite {
       test("solver"){
         calcLogicalNextSteps(List(oneCellMissingSudoku)) ==> List(goodSudoku)
         calcLogicalNextSteps(List(someCellMissingSudoku)) ==> List(goodSudoku)
-        finishSudoku(oneCellMissingSudoku) ==> Option(goodSudoku)
-        finishSudoku(someCellMissingSudoku) ==> Option(goodSudoku)
-        finishSudoku(partiallySolvedGoodSudoku) ==> Option(goodSudoku)
+        calcLogicalNextSteps(List(notGoodSudoku)) ==> List()
+        finishSudoku(oneCellMissingSudoku) ==> Some(goodSudoku)
+        finishSudoku(someCellMissingSudoku) ==> Some(goodSudoku)
+        finishSudoku(partiallySolvedGoodSudoku) ==> Some(goodSudoku)
+        finishSudoku(notGoodSudoku) ==> None
+
       }
       test("insert"){
         Sudoku(
