@@ -18,9 +18,9 @@ object ValidationTest extends TestSuite {
       test("areCellsSolved") {
         val filledButInvalidRow = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).map(x => Some(x))
         areCellsSolved(filledButInvalidRow) ==> false
-        allRowsSolved(goodSudoku) ==> true
-        allRowsSolved(oneCellMissingSudoku) ==> false
-        allRowsSolved(someCellMissingSudoku) ==> false
+        areAllRowsSolved(goodSudoku) ==> true
+        areAllRowsSolved(oneCellMissingSudoku) ==> false
+        areAllRowsSolved(someCellMissingSudoku) ==> false
         isSudokuSolved(goodSudoku) ==> true
         isSudokuSolved(notGoodSudoku) ==> false
       }

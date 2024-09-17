@@ -65,7 +65,8 @@ object Pretty {
     val colourLen = colour.length + end.length
     val initLen = lst(rowIX).length
     val initIX = 0
-    val (finalList, finalLen, finalIX) = orderedCols.foldLeft{(lst, lst(rowIX).length, initIX)} { case ((curList, curLen, curIX), curCoord) =>
+    val (finalList, finalLen, finalIX) =
+      orderedCols.foldLeft{(lst, lst(rowIX).length, initIX)} { case ((curList, curLen, curIX), curCoord) =>
       val charIX = (curCoord + 1) * 4 + curIX * colourLen - 1
       val nextRow = curList(rowIX).take(charIX) + colour + curList(rowIX).slice(charIX, charIX + 1) +
         "\u001b[0m" + curList(rowIX).slice(charIX + 1, curLen)

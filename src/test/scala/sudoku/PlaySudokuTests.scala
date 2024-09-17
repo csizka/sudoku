@@ -5,6 +5,9 @@ import sudoku.Examples.*
 import sudoku.Validation.*
 import sudoku.Sudoku.*
 import sudoku.Solving.*
+import sudoku.Pretty.*
+import scala.io.AnsiColor.*
+import sudoku.main
 
 import PlaySudoku.*
 import Generate.*
@@ -194,6 +197,23 @@ object PlaySudokuTests extends TestSuite {
         assertMatch(execCommand(emptySudoku, Finish(), emptySudoku, emptyHistory)) {
           case (Right(x: Sudoku), emptyHistory) if isSudokuSolved(x) => ()
         }
+      }
+    }
+    test("prettyColours") {
+      assertMatch(prettyColours(goodSudoku, GREEN, Map(0 -> Set(0)))) {
+        case string: String if string == pretty(goodSudoku).take(43) + GREEN +
+          pretty(goodSudoku).slice(43, 44) + "\u001b[0m" + pretty(goodSudoku).drop(44) => ()
+      }
+      assertMatch(prettyColours(goodSudoku, GREEN, Map())) {
+        case string: String if string == pretty(goodSudoku) => ()
+      }
+    }
+    test("repetitiveCoords") {
+      assertMatch(allRepetitiveCoords(notGoodSudoku)) {
+        case vector: Vector[(Int, Int)] if vector.toSet == Set((5,7), (7,7), (7,8)) => ()
+      }
+      assertMatch(allRepetitiveCoords(goodSudoku)) {
+        case vector: Vector[(Int, Int)] if vector.isEmpty => ()
       }
     }
   }

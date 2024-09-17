@@ -10,12 +10,12 @@ import scala.util.*
 import scala.annotation.tailrec
 
 object Validation {
-
+  
   //Row Tests
   def areCellsSolved(vector: Vector[Cell]): Boolean = {
     @tailrec
     def areCellsSolvedHelper(restElems: Vector[Cell], set: Set[Int]): Boolean = restElems match {
-      case Vector() => set == Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
+      case Vector() => set == (1 to 9).toSet
       case Some(x) +: rest if (1 to 9).contains(x) => areCellsSolvedHelper(rest, set + x)
       case _ => false
     }
@@ -35,21 +35,21 @@ object Validation {
     vector.size == 9 && !vector.contains(None)
   }
 
-  def allRowsSolved(sudoku: Sudoku): Boolean = {
-    sudoku.rows.forall(areCellsSolved) && sudoku.rows.size == 9
+  def areAllRowsSolved(sudoku: Sudoku): Boolean = {
+    sudoku.rows.forall(areCellsSolved)
   }
 
   def allRowsRepetitionFree(sudoku: Sudoku): Boolean = {
     sudoku.rows.forall(areCellsRepetitionFree)
   }
-  
+
   // Column tests
   def getNthColumn(sudoku: Sudoku, n: Int): Row = {
     if (0 <= n && n <= 8)
       sudoku.rows.map(row => row(n))
     else throw new IndexOutOfBoundsException(s" the index inserted: $n is invalid, please use an index between 0 and 8")
   }
-  
+
   def getAllColumns(sudoku: Sudoku): Vector[Column] = {
     sudoku.rows.indices
       .map(n => getNthColumn(sudoku, n))
@@ -74,6 +74,7 @@ object Validation {
     }
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
+
   def getNthBlockV2(sudoku: Sudoku, n: Int): Block = {
     if (0 <= n && n <= 8) {
       val firstXCoord = n / 3 * 3
@@ -86,16 +87,13 @@ object Validation {
     }
     else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
-  
+
   def getAllBlocks(sudoku: Sudoku): Vector[Block] = {
-    if (sudoku.rows.nonEmpty) {
       sudoku.rows.indices
         .map(n => getNthBlock(sudoku, n))
         .toVector
-    }
-    else Vector.empty[Block]
   }
-  
+
   def areAllBlocksRepetitionFree(sudoku: Sudoku): Boolean = {
     getAllBlocks(sudoku).forall(areCellsRepetitionFree)
   }
@@ -103,7 +101,7 @@ object Validation {
   def areAllBlocksSolved(sudoku: Sudoku): Boolean = {
     getAllBlocks(sudoku).forall(areCellsSolved)
   }
-  
+
   def isSudokuRepetitionFree(sudoku:Sudoku): Boolean = {
     areAllBlocksRepetitionFree(sudoku) &&
     areAllColumnsRepetitionFree(sudoku) &&
@@ -115,13 +113,8 @@ object Validation {
 }
 
   def isSudokuSolved(sudoku: Sudoku): Boolean = {
-    isSudokuRepetitionFree(sudoku) &&
-    sudoku.rows.flatten.size == 81 &&
-    numOfEmptyCells(sudoku) == 0 &&
-    sudoku.rows.flatten.map {
-      case Some(x) => x
-      case None => 0
-    }.toSet == (1 to 9).toSet
-
+    areAllBlocksSolved(sudoku) &&
+    areAllColumnsSolved(sudoku) &&
+    areAllRowsSolved(sudoku)
   }
 }

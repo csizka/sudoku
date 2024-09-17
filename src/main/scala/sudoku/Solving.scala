@@ -68,15 +68,19 @@ object Solving {
   def calcLogicalNextSteps(lstOfSudoku: List[Sudoku]): List[Sudoku] = lstOfSudoku match {
     case Nil => List.empty
     case curSudoku :: restSudokus =>
-      val singleChoicesFilled = fix(fillCellsWithSingleChoices)(curSudoku)
+      val singleChoicesFilled = fillCellsWithSingleChoicesRepeatedly(curSudoku)
       val emptyCells = collectEmptyCellCoords(singleChoicesFilled)
       val sudokuIsUnsolvable = emptyCells.exists{ case (x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y) == 0} ||
         !isSudokuRepetitionFree(singleChoicesFilled)
-      lazy val sudokuIsSolved = isSudokuSolved(singleChoicesFilled)
-      if (sudokuIsSolved) {
-        List(singleChoicesFilled)
-      } else if (sudokuIsUnsolvable) {
+      if (emptyCells.isEmpty) {
+        val sudokuIsSolved = isSudokuSolved(singleChoicesFilled)
+        if (sudokuIsSolved) {
+          List(singleChoicesFilled)
+        } else {
         calcLogicalNextSteps(restSudokus)
+        }
+      } else if (sudokuIsUnsolvable) {
+          calcLogicalNextSteps(restSudokus)
       } else {
         val cellToFill = emptyCells.minBy((x, y) => numOfPossibleSolutionsForCell(singleChoicesFilled, x, y))
         calcLogicalNextSteps(calcNextSteps(singleChoicesFilled, cellToFill._1, cellToFill._2) ++ restSudokus)

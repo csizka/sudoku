@@ -17,7 +17,6 @@ import Generate.*
 import Validation.*
 import Misc.*
 
-
 sealed trait Command
 case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
 case class Delete(rowIx: Int, colIx: Int) extends Command
@@ -25,8 +24,6 @@ case class Restart() extends Command
 case class Undo(numOfSteps: Int) extends Command
 case class Finish() extends Command
 case class Hint() extends Command
-
-type CellHistory = Vector[(Int, Int, Cell)]
 
 object PlaySudoku {
 
@@ -99,16 +96,18 @@ object PlaySudoku {
     finalMap
   }
 
+  val zeroCoords = Vector((0,0), (2,6), (3,1), (4,2), (7,5), (8,8))
+
   def checkLevelInst(inst: String): Either[String, Sudoku] = inst match {
     case "1" =>
       println("You have chosen Easy level.")
-      Right(generateEasySudoku(generateSolvedSudoku(0, 0)))
+      Right(generateEasySudoku(generateControlledSudoku(zeroCoords)))
     case "2" =>
       println("You have chosen Medium level.")
-      Right(generateMediumSudoku(generateSolvedSudoku(0, 0)))
+      Right(generateMediumSudoku(generateControlledSudoku(zeroCoords)))
     case "3" =>
       println("You have chosen Hard level.")
-      Right(generateHardSudoku(generateSolvedSudoku(0, 0)))
+      Right(generateHardSudoku(generateControlledSudoku(zeroCoords)))
     case _   =>
       Left(s"Invalid level requested: $inst. Please write in the number of the level you would like to play! 1: Easy, 2: Medium, 3: Hard"
       )
