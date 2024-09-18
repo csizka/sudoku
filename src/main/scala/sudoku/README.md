@@ -44,7 +44,7 @@ They can easily be retrieved from the rows with the use of mathematical function
 We can define the set of coordinates of the `n`th column with the following formula: `{ (i,n) | i ∈ {0 to 8} }`
 We can define the set of coordinates of the `n`th block with following formula: `{ ((n / 3 * 3 + i) | i ∈ {0,1,2} } x { ((n % 3 * 3 + i) | i ∈ {0,1,2} }`
 
-In order to track changes in specified `Cell`s, and easily access them, type `Cellhistory = Vector[(Int, Int, Cell)]` is introduced. The first Int is the row index, while the second is the column index in the Tuples.
+In order to track changes in specified `Cell`s, and easily access them, type `Cellhistory = Vector[(Int, Int, Cell)]` is introduced. The first Int is the row index, while the second is the column index in the Tuples. 
 
 ### File structure
 
@@ -170,7 +170,34 @@ For example to print this: ![img_1.png](img_1.png) we could write the following 
 This way if we collect the coordinates of colliding values, we can colour them while pretty printing.
 
 ### CLI interface
-TODO:  command representation, parsing, execution
+
+The core function of the game parses the user command and will call itself with the updated Sudoku or the previous state of the Sudoku - depending on whether the command was executed. The function returns when the Sudoku is solved.
+
+This core function relies on the below data:
+- the current State of the Sudoku - *on which the successful commands will be done*
+- the starting state of the Sudoku - *as the cells that are defined at the beginning cannot be changed*
+- past changes of the Sudoku - *documenting the values the insertions and deletions are changing are needed for the implementation of the undo command.*
+
+The commands are represented with the below case classes which extend the sealed trait Command:
+- Insert - *which has 3 fields: rowIx, colIx, value - as inserting requires the coordinate where to insert and a value to insert*
+- Delete - *which has 2 fields: rowIx, colIx - as deletion only needs the coordinate of the Cell the value of which should be set to None*
+- Undo *which has 1 filed: number of steps to be undone*
+- Restart - *with no fields*
+- Finish - *with no fields*
+- Hint - *with no fields*
+
+The user commands are parsed a several steps, and can result in either an error message, or a new state of the Sudoku and changes so far.
+1. Firstly the input is retrieved with the use of `readline()`
+2. The input is filtered by a general parser. This general parser can lead to the below next steps:
+- calling a specific parser for possible insertion, deletion or undoing commands
+- calling one of the following commands: Restart, Finish or Hint
+- returning an error message.
+3. If the specific parsers are called, they can either result in an error message, or one of the following commands: Insert, Delete or Undo.
+
+If the parsing is successful, an execution function uses pattern matching on the command, which will already have all relevant information in its fields. This way one function can easily execute all the commands. Also, as Command is a sealed trait, there can be no other commands, only the ones we defined.
+
+I would like to explain my data-structure choice regarding the Undo command. Changes are represented with type `Cellhistory = Vector[(Int, Int, Cell)]`. The Tuples consist of rowIx, colIx and value. When an insertion or deletion is done, the previous state of the changed cell is added to the beginning of the Vector. The Undo command will update the affected Cells with their past values from the beginning of the Vector. This means, that the last action is undone first.
+There are many other solutions for this task, for example we could store the past states of the Sudoku as well. In this case we could just set the current Sudoku to a previous state, but then the Vector would need to store the whole Sudokus, not only coordinates and values. As the Vector storing all previous states is the input of every call of the core algorithm, and the command undo is used less often, I chose to store (rowIx, colIx, value) Tuples.
 
 ### Possible features to be added in the future
 

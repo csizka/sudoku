@@ -123,7 +123,6 @@ object PlaySudoku {
   }
 
   def parseCommand(inst: String): Either[String, Command] = inst.toList match {
-    case Nil => Left(s"Your command: '$inst' was not understood, please check what went wrong and try something else! (~_~)")
     case 'i' :: rest =>
       parseInsertCmd(rest)
     case 'd' :: rest =>
