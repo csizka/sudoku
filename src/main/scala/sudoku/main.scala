@@ -22,5 +22,6 @@ import scala.util.Random
 @main
 def main(): Unit = {
 playSudoku()
+
 }
 

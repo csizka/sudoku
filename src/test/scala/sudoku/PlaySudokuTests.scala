@@ -6,6 +6,7 @@ import sudoku.Validation.*
 import sudoku.Sudoku.*
 import sudoku.Solving.*
 import sudoku.Pretty.*
+import sudoku.Misc.*
 import scala.io.AnsiColor.*
 import sudoku.main
 
@@ -200,11 +201,11 @@ object PlaySudokuTests extends TestSuite {
       }
     }
     test("prettyColours") {
-      assertMatch(prettyColours(goodSudoku, GREEN, Map(0 -> Set(0)))) {
+      assertMatch(pretty(goodSudoku, Map(0 -> Set(0)), GREEN)) {
         case string: String if string == pretty(goodSudoku).take(43) + GREEN +
           pretty(goodSudoku).slice(43, 44) + "\u001b[0m" + pretty(goodSudoku).drop(44) => ()
       }
-      assertMatch(prettyColours(goodSudoku, GREEN, Map())) {
+      assertMatch(pretty(goodSudoku, Map(), GREEN)) {
         case string: String if string == pretty(goodSudoku) => ()
       }
     }

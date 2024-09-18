@@ -15,7 +15,6 @@ import sudoku.Solving.*
 import Pretty.*
 import Generate.*
 import Validation.*
-import Misc.*
 
 sealed trait Command
 case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command
@@ -282,11 +281,10 @@ object PlaySudoku {
       val repCoordsByRow = repetitionsByRows(curSudoku)
       if (repCoordsByRow.isEmpty) {
         println("Here is the current state of your Sudoku:")
-        println(pretty(curSudoku))
       } else {
         printColoredMsg(RED, "Here is the current state of your Sudoku. All the repetitions in the rows, columns and blocks can be found highlighted with red below: (°-°)")
-        println(prettyColours(curSudoku, RED, repCoordsByRow))
       }
+      println(pretty(curSudoku, repCoordsByRow, RED))
       instructions()
 
       val rawCmdStr = readLine()
