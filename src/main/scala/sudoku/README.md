@@ -171,33 +171,21 @@ This way if we collect the coordinates of colliding values, we can colour them w
 
 ### CLI interface
 
-The core function of the game parses the user command and will call itself with the updated Sudoku or the previous state of the Sudoku - depending on whether the command was executed. The function returns when the Sudoku is solved.
+The main loop of the game firstly attempts to parse the user command, and if the parsing was successful it will execute it. The outcome of one loop could either be an error message or a new state of the Sudoku. The function returns when the Sudoku is solved.
 
-This core function relies on the below data:
-- the current State of the Sudoku - *on which the successful commands will be done*
-- the starting state of the Sudoku - *as the cells that are defined at the beginning cannot be changed*
+This main loop relies on the following data:
+- the current State of the Sudoku - *which will be the input of the command to be executed*
+- the starting state of the Sudoku - *as the cells that are defined at the beginning cannot be changed, furthermore the starting Sudoku is utilized by the restart command*
 - past changes of the Sudoku - *documenting the values the insertions and deletions are changing are needed for the implementation of the undo command.*
 
-The commands are represented with the below case classes which extend the sealed trait Command:
-- Insert - *which has 3 fields: rowIx, colIx, value - as inserting requires the coordinate where to insert and a value to insert*
-- Delete - *which has 2 fields: rowIx, colIx - as deletion only needs the coordinate of the Cell the value of which should be set to None*
-- Undo *which has 1 filed: number of steps to be undone*
-- Restart - *with no fields*
-- Finish - *with no fields*
-- Hint - *with no fields*
+In the main loop the parsing and the execution of a user command are completely separated thanks to using an algebraic data type. This enables us to test the parsing and execution functions separately and if there were several developers working on this project, the parsing could have been developed in parallel with the execution. Lastly as `Command` is a sealed trait, commands can only be defined in this file.
 
-The user commands are parsed a several steps, and can result in either an error message, or a new state of the Sudoku and changes so far.
-1. Firstly the input is retrieved with the use of `readline()`
-2. The input is filtered by a general parser. This general parser can lead to the below next steps:
-- calling a specific parser for possible insertion, deletion or undoing commands
-- calling one of the following commands: Restart, Finish or Hint
-- returning an error message.
-3. If the specific parsers are called, they can either result in an error message, or one of the following commands: Insert, Delete or Undo.
+The user inputs are parsed in several steps, and can return either an error message or a command. If the parsing is successful, an execution function uses pattern matching on the command, which will already have all the relevant information in its fields. This way one function can easily execute all the commands. 
 
-If the parsing is successful, an execution function uses pattern matching on the command, which will already have all relevant information in its fields. This way one function can easily execute all the commands. Also, as Command is a sealed trait, there can be no other commands, only the ones we defined.
+Regarding the Undo command: we use a LIFO data structure to track the changes when an insertion or deletion is executed.
+The previous state of the changed cell is added to the beginning of this data structure, and when the user executes the undo command, it restores the affected Cells to their previous values.
 
-I would like to explain my data-structure choice regarding the Undo command. Changes are represented with type `Cellhistory = Vector[(Int, Int, Cell)]`. The Tuples consist of rowIx, colIx and value. When an insertion or deletion is done, the previous state of the changed cell is added to the beginning of the Vector. The Undo command will update the affected Cells with their past values from the beginning of the Vector. This means, that the last action is undone first.
-There are many other solutions for this task, for example we could store the past states of the Sudoku as well. In this case we could just set the current Sudoku to a previous state, but then the Vector would need to store the whole Sudokus, not only coordinates and values. As the Vector storing all previous states is the input of every call of the core algorithm, and the command undo is used less often, I chose to store (rowIx, colIx, value) Tuples.
+An alternative design choice could be storing the past states of the whole Sudoku. In this case when using the undo command, we could just set the current sudoku to a previous state. With this structure the we would need to store the whole Sudokus, not only coordinates and values. The tradeoff is that with storing the whole sudokus the implementation of the undo command is simpler, however this choice requires more data storage. Meanwhile with storing only the coordinates and values of the changed cells, the undo command might execute a few cell updates, but will need less storage.
 
 ### Possible features to be added in the future
 
