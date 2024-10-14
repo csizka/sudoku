@@ -146,15 +146,7 @@ object ValidationTest extends TestSuite {
         println("sudoku deleted")
       }
       testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
-
-
-
-
-
-
-
-
-
+      
       testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
       testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }
