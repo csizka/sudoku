@@ -1,8 +1,8 @@
 package junicamp
 package sudoku
 
+import sudoku.Pretty.*
 import sudoku.Validation.*
-import Pretty.*
 
 import scala.annotation.tailrec
 

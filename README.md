@@ -50,7 +50,7 @@ In order to track changes in specified cells, and easily access them, type `Cell
 
 The project consists of the following files:
 - Sudoku - *Definition of types and methods*
-- Validation - *Function definitions for checking whether a logical unit consists valid values, is repetition-free and is solved*
+- Validation - *Function definitions for checking whether a logical unit consists of valid values, is repetition-free and is solved*
 - Solving - *Function definitions that are needed for solving the sudoku*
 - Generate - *Function definitions that are needed for generating sudokus with a defined difficulty level*
 - Pretty - *Function definitions needed for printing the current state of the sudoku to the console*

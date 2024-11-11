@@ -1,16 +1,17 @@
 package junicamp
 package sudoku
 
-import sudoku.PlaySudoku.*
-import sudoku.Pretty.pretty
-import sudoku.Validation.*
-import sudoku.Solving.*
 import sudoku.Examples.*
+import sudoku.PlaySudoku.*
 import sudoku.Pretty.*
+import sudoku.Solving.*
+import sudoku.Validation.*
 
+import java.nio.file.{Files, Path, Paths}
 import scala.annotation.tailrec
 import scala.io.AnsiColor
 import scala.io.StdIn.readLine
+import scala.jdk.CollectionConverters.*
 import scala.util.Random
 
 def isColumnRepetitive(sudoku: Sudoku, index: Int): String = {
@@ -26,6 +27,35 @@ def isBlockRepetitive(sudoku: Sudoku, index: Int): String = {
 def isRowRepetitive(sudoku: Sudoku, index: Int): String = {
   if (areCellsRepetitionFree(sudoku.rows(index))) "not repetitive"
   else "repetitive"
+}
+
+object Serde{
+  def serialize(sudoku: Sudoku): List[String] =
+    sudoku.rows.map { row =>
+      row.map(_.fold(".")(x => x.toString)).mkString
+    }.toList
+
+  def deserialize(serializedSudoku: List[String]): Sudoku = {
+    Sudoku(serializedSudoku.map {
+      _.stripSuffix("\n").map {
+        case '.' => None
+        case x => Some(x.toInt - 48)
+      }.toVector
+    }.toVector)
+  }
+
+  val path = Paths.get("./test.txt")
+  val lines = Files.readAllLines(path).asScala
+  val wholeFileAsString = Files.readString(path)
+  val bytes = Files.readAllBytes(path).toList
+
+  def save(sudoku: Sudoku, path: Path): Unit = {
+    Files.write(path, serialize(sudoku).asJava)
+  }
+
+  def load(path: Path): Sudoku = {
+    deserialize(Files.readAllLines(path).asScala.toList)
+  }
 }
 
 object Misc{

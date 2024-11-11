@@ -2,14 +2,16 @@ package junicamp
 package sudoku
 
 import sudoku.Examples.*
-import sudoku.Validation.*
-import sudoku.Sudoku.*
-import sudoku.Solving.*
+import sudoku.Generate.*
 import sudoku.Misc.*
-import Generate.*
+import sudoku.Solving.*
+import sudoku.Sudoku.*
+import sudoku.Validation.*
+import sudoku.Serde.*
+
 import utest.*
 
-import java.nio.file.{Files, Paths, Path}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters.*
 
 object ValidationTest extends TestSuite {
