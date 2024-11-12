@@ -9,10 +9,13 @@ import sudoku.Sudoku.*
 import sudoku.Validation.*
 import sudoku.Serde.*
 
+import junicamp.sudoku
 import utest.*
 
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters.*
+import scala.language.postfixOps
+import scala.util.Random
 
 object ValidationTest extends TestSuite {
   val tests = Tests {
@@ -26,6 +29,7 @@ object ValidationTest extends TestSuite {
         isSudokuSolved(goodSudoku) ==> true
         isSudokuSolved(notGoodSudoku) ==> false
       }
+
       test("areCellsValid"){
         val filledButInvalidRow = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).map(x => Some(x))
         areCellsValid(filledButInvalidRow) ==> false
@@ -152,6 +156,41 @@ object ValidationTest extends TestSuite {
       testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
       testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }
+    test("generate"){
+      val rand = new Random(42)
+      val coords = sudoku.PlaySudoku.zeroCoords
 
+      def generateControlledSudokuTest(coords: Vector[(Int, Int)]): Unit = {
+        val startSudoku = coords.foldLeft(emptySudoku) { case (curSudoku, (rowIx, colIx)) =>
+          curSudoku.insert(rowIx, colIx, rand.nextInt(9) + 1)
+        }
+        val coordValues = coords.foldLeft(List[(Int, Int, Int)]()) { case (curList, (curX, curY)) =>
+          (curX, curY, startSudoku.rows(curX)(curY).get) +: curList
+        }
+        println(coordValues)
+        val sudoku = finishSudoku(startSudoku).get
+      }
+
+      test("values"){
+
+        generateControlledSudokuTest(coords)
+
+      }
+      test("generating statistics are OK"){
+        val numOfGen = 100
+        val times = (1 to numOfGen).toList.map(i =>
+          val startTime = System.nanoTime()
+          generateControlledSudoku(coords)
+          val endTime = System.nanoTime()
+          endTime - startTime
+        )
+        val avg = times.sum / numOfGen * Math.pow(10, -9)
+        val max = times.max * Math.pow(10, -9)
+        val min = times.min
+        println(s"Times of generating Sudokus, AVG: $avg sec, MIN: $min sec, MAX: $max sec")
+        assert(avg < 1)
+        assert(max < 3)
+      }
+    }
   }
 }

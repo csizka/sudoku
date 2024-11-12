@@ -3,11 +3,11 @@ package sudoku
 
 import sudoku.Examples.*
 import sudoku.Pretty.*
-import sudoku.Sudoku.*
 import sudoku.Solving.*
-import scala.util.*
+import sudoku.Sudoku.*
 
 import scala.annotation.tailrec
+import scala.util.*
 
 object Validation {
   
@@ -64,28 +64,20 @@ object Validation {
     getAllColumns(sudoku).forall(areCellsSolved)
   }
 
-  def getNthBlock(sudoku: Sudoku, n: Int): Block = {
-    if (0 <= n && n <= 8) {
-      val row = n / 3 * 3
-      val allRows = Vector(row, row + 1, row + 2)
-      val column = n % 3 * 3
+  def nthBlockCoords(sudoku: Sudoku, n: Int): Vector[(Int, Int)] = {
+    if ( 0 <= n && n <= 8) {
+      val fstXCoord = n / 3 * 3
+      val fstYCoord = n % 3 * 3
+      for {
+        x <- Vector(fstXCoord, fstXCoord + 1, fstXCoord + 2)
+        y <- Vector(fstYCoord, fstYCoord + 1, fstYCoord + 2)
+      } yield (x,y)
 
-      allRows.flatMap(x => sudoku.rows(x).slice(column, column + 3))
-    }
-    else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
+    } else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
   }
 
-  def getNthBlockV2(sudoku: Sudoku, n: Int): Block = {
-    if (0 <= n && n <= 8) {
-      val firstXCoord = n / 3 * 3
-      val firstYCoord = n % 3 * 3
-      val blockCoords = for {
-        x <- Vector(firstXCoord, firstXCoord + 1, firstXCoord + 2)
-        y <- Vector(firstYCoord, firstYCoord + 1, firstYCoord + 2)
-      } yield (x,y)
-      blockCoords.map((x, y) => sudoku.rows(x)(y))
-    }
-    else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
+  def getNthBlock(sudoku: Sudoku, n: Int): Block = {
+    nthBlockCoords(sudoku, n).map( (x, y) => sudoku.rows(x)(y))
   }
 
   def getAllBlocks(sudoku: Sudoku): Vector[Block] = {

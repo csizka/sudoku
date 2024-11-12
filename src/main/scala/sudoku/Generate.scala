@@ -1,15 +1,14 @@
 package junicamp
 package sudoku
 
-import sudoku.Validation.*
+import sudoku.Examples.*
+import sudoku.Generate.countSolutions
 import sudoku.Solving.*
 import sudoku.Sudoku.*
-import sudoku.Examples.*
+import sudoku.Validation.*
 
-import sudoku.Generate.countSolutions
-
-import scala.util.Random
 import scala.annotation.tailrec
+import scala.util.Random
 
 object Generate {
 
@@ -20,11 +19,15 @@ object Generate {
     finishSudoku(startSudoku).get
   }
 
+  @tailrec
   def generateControlledSudoku(coords: Vector[(Int, Int)]): Sudoku = {
     val startSudoku = coords.foldLeft(emptySudoku) { case (curSudoku, (rowIx, colIx)) =>
       curSudoku.insert(rowIx, colIx, rand.nextInt(9) + 1)
     }
-    finishSudoku(startSudoku).get
+    finishSudoku(startSudoku) match {
+      case Some(sudoku) => sudoku
+      case _ => generateControlledSudoku(coords)
+    }
   }
 
   def deleteRandomCell(sudoku: Sudoku): Sudoku = {

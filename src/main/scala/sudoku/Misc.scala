@@ -14,21 +14,6 @@ import scala.io.StdIn.readLine
 import scala.jdk.CollectionConverters.*
 import scala.util.Random
 
-def isColumnRepetitive(sudoku: Sudoku, index: Int): String = {
-  if (areCellsRepetitionFree(getNthColumn(sudoku, index))) "not repetitive"
-  else "repetitive"
-}
-
-def isBlockRepetitive(sudoku: Sudoku, index: Int): String = {
-  if (areCellsRepetitionFree(getNthBlock(sudoku, index))) "not repetitive"
-  else "repetitive"
-}
-
-def isRowRepetitive(sudoku: Sudoku, index: Int): String = {
-  if (areCellsRepetitionFree(sudoku.rows(index))) "not repetitive"
-  else "repetitive"
-}
-
 object Serde{
   def serialize(sudoku: Sudoku): List[String] =
     sudoku.rows.map { row =>
@@ -115,6 +100,17 @@ object Misc{
 
   def numToIndex(num: Int): Int = num - 1
 
+  def getNthBlockV2(sudoku: Sudoku, n: Int): Block = {
+    if (0 <= n && n <= 8) {
+      val row = n / 3 * 3
+      val allRows = Vector(row, row + 1, row + 2)
+      val column = n % 3 * 3
+
+      allRows.flatMap(x => sudoku.rows(x).slice(column, column + 3))
+    }
+    else throw new IndexOutOfBoundsException(s"The index $n is not valid, please use one between 0 and 8.")
+  }
+
   def execUndoTailRec(curSudoku: Sudoku, changes: CellHistory, numOfSteps: Int): (Either[String, Sudoku], CellHistory) = {
     @tailrec
     def execUndoHelper(curSudoku: Sudoku, changes: CellHistory): (Either[String, Sudoku], CellHistory) = changes match {
@@ -161,7 +157,21 @@ object Misc{
       fillCell(sudoku, name)
     }
   }
-  
+
+  def isColumnRepetitive(sudoku: Sudoku, index: Int): String = {
+    if (areCellsRepetitionFree(getNthColumn(sudoku, index))) "not repetitive"
+    else "repetitive"
+  }
+
+  def isBlockRepetitive(sudoku: Sudoku, index: Int): String = {
+    if (areCellsRepetitionFree(getNthBlock(sudoku, index))) "not repetitive"
+    else "repetitive"
+  }
+
+  def isRowRepetitive(sudoku: Sudoku, index: Int): String = {
+    if (areCellsRepetitionFree(sudoku.rows(index))) "not repetitive"
+    else "repetitive"
+  }
 
   def countOfSingleChoiceCells(sudoku: Sudoku): Int = {
     collectEmptyCellCoords(sudoku).count { case (x, y) => numOfPossibleSolutionsForCell(sudoku, x, y) == 1 }
