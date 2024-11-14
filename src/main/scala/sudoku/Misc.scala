@@ -44,10 +44,10 @@ object Serde{
     }.toVector)
   }
 
-  val path = Paths.get("./test.txt")
-  val lines = Files.readAllLines(path).asScala
-  val wholeFileAsString = Files.readString(path)
-  val bytes = Files.readAllBytes(path).toList
+  // val path = Paths.get("./test.txt")
+  // val lines = Files.readAllLines(path).asScala
+  // val wholeFileAsString = Files.readString(path)
+  // val bytes = Files.readAllBytes(path).toList
 
   def save(sudoku: Sudoku, path: Path): Unit = {
     Files.write(path, serialize(sudoku).asJava)
