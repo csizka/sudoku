@@ -2,6 +2,7 @@ package junicamp
 package sudoku
 
 import sudoku.Examples.*
+
 import scala.util.Random
 
 type Cell = Option[Int]

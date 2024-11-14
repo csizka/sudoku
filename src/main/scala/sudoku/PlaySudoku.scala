@@ -63,13 +63,7 @@ object PlaySudoku {
   }
 
   def nthBlockRepetitiveCoords(blockIx: Int, sudoku: Sudoku): Vector[(Int, Int)] = {
-    val firstRow = blockIx / 3 * 3
-    val firstCol = blockIx % 3 * 3
-    val blockCoords = for {
-      rowIx <- Vector(firstRow, firstRow + 1, firstRow + 2)
-      colIx <- Vector(firstCol, firstCol + 1, firstCol + 2)
-    } yield (rowIx, colIx)
-    blockCoords.flatMap((rowIx, colIx) => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
+    nthBlockCoords(sudoku, blockIx).flatMap((rowIx, colIx) => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
       .groupMap(_._1)(_._2)
       .filter(_._2.size > 1)
       .values
@@ -94,7 +88,7 @@ object PlaySudoku {
     finalMap
   }
 
-  val zeroCoords = Vector((0,0), (2,6), (3,1), (4,2), (7,5), (8,8))
+  val zeroCoords = Vector((0,0), (2,6), (3,1), (4,4), (7,5), (8,8))
 
   def checkLevelInst(inst: String): Either[String, Sudoku] = inst match {
     case "1" =>

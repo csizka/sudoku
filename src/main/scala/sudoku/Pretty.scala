@@ -1,10 +1,10 @@
 package junicamp
 package sudoku
 
-import Sudoku.*
+import sudoku.Sudoku.*
 
 object Pretty {
-
+  
   val firstRowPretty: String =  " ╔═1═╤═2═╤═3═╦═4═╤═5═╤═6═╦═7═╤═8═╤═9═╗ "
   val singleRowPretty: String = " ╟───┼───┼───╫───┼───┼───╫───┼───┼───╢ "
   val doubleRowPretty: String = " ╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣ "
