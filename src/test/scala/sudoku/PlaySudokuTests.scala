@@ -3,19 +3,11 @@ package sudoku
 
 import sudoku.Examples.*
 import sudoku.Validation.*
-import sudoku.Sudoku.*
-import sudoku.Solving.*
 import sudoku.Pretty.*
-import sudoku.Misc.*
+import sudoku.PlaySudoku.*
+
 import scala.io.AnsiColor.*
-import sudoku.main
-
-import PlaySudoku.*
-import Generate.*
-import sudoku.PlaySudokuTests.emptyHistory
 import utest.*
-
-import scala.jdk.CollectionConverters.*
 
 object PlaySudokuTests extends TestSuite {
   val emptyHistory = Vector.empty[(Int, Int, Cell)]

@@ -1,8 +1,6 @@
 package junicamp
 package sudoku
 
-import sudoku.Sudoku.*
-
 object Pretty {
   
   val firstRowPretty: String =  " ╔═1═╤═2═╤═3═╦═4═╤═5═╤═6═╦═7═╤═8═╤═9═╗ "
@@ -41,15 +39,9 @@ object Pretty {
 
     val frameRowsWithoutLast: Vector[String] = Vector(
       firstRowPretty,
-      singleRowPretty,
-      singleRowPretty,
       doubleRowPretty,
-      singleRowPretty,
-      singleRowPretty,
       doubleRowPretty,
-      singleRowPretty,
-      singleRowPretty,
-    )
+    ).flatMap ( row => Vector(row, singleRowPretty, singleRowPretty))
 
     frameRowsWithoutLast
       .zipWithIndex

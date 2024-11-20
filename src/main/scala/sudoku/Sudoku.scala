@@ -3,8 +3,6 @@ package sudoku
 
 import sudoku.Examples.*
 
-import scala.util.Random
-
 type Cell = Option[Int]
 type Row = Vector[Cell]
 type Column = Vector[Cell]

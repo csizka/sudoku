@@ -1,13 +1,7 @@
 package junicamp
 package sudoku
 
-import sudoku.Examples.*
-import sudoku.Pretty.*
-import sudoku.Solving.*
-import sudoku.Sudoku.*
-
 import scala.annotation.tailrec
-import scala.util.*
 
 object Validation {
   

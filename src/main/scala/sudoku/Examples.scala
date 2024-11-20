@@ -1,10 +1,6 @@
 package junicamp
 package sudoku
 
-import sudoku.Validation.*
-
-import scala.util.Random
-
 //noinspection ScalaWeakerAccess,TypeAnnotation
 object Examples {
 

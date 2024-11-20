@@ -1,7 +1,6 @@
 package junicamp
 package sudoku
 
-import sudoku.Examples.*
 import sudoku.PlaySudoku.*
 import sudoku.Pretty.*
 import sudoku.Solving.*
@@ -9,7 +8,6 @@ import sudoku.Validation.*
 
 import java.nio.file.{Files, Path, Paths}
 import scala.annotation.tailrec
-import scala.io.AnsiColor
 import scala.io.StdIn.readLine
 import scala.jdk.CollectionConverters.*
 import scala.util.Random

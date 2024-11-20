@@ -1,19 +1,16 @@
 package junicamp
 package sudoku
 
-import sudoku.Examples.*
 import sudoku.Generate.*
 import sudoku.Pretty.*
 import sudoku.Solving.*
 import sudoku.Sudoku.*
 import sudoku.Validation.*
 
-import java.nio.file.{Files, Path, Paths}
 import scala.annotation.{nowarn, tailrec}
 import scala.io.AnsiColor.*
 import scala.io.StdIn.readLine
-import scala.jdk.CollectionConverters.*
-import scala.util.{Random, Try}
+import scala.util.Try
 
 sealed trait Command
 case class Insert(rowIx: Int, colIx: Int, value: Int) extends Command

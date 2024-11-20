@@ -9,11 +9,9 @@ import sudoku.Sudoku.*
 import sudoku.Validation.*
 import sudoku.Serde.*
 
-import junicamp.sudoku
 import utest.*
 
 import java.nio.file.{Files, Path, Paths}
-import scala.jdk.CollectionConverters.*
 import scala.language.postfixOps
 import scala.util.Random
 
@@ -142,20 +140,7 @@ object ValidationTest extends TestSuite {
       val deserializedSerializedNotGoodSudoku = deserialize(serialize(notGoodSudoku))
       deserializedSerializedNotGoodSudoku ==> notGoodSudoku
     }
-    test("testSavingAndReading"){
-      def testSavingAndReading(path: Path, sudoku: Sudoku): Unit = {
-        save(sudoku, path)
-        println("sudoku saved")
-        Files.exists(path) ==> true
-        load(path) ==> sudoku
-        Files.delete(path)
-        println("sudoku deleted")
-      }
-      testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
-      
-      testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
-      testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
-    }
+
     test("generate"){
       val rand = new Random(42)
       val coords = sudoku.PlaySudoku.zeroCoords
@@ -167,16 +152,21 @@ object ValidationTest extends TestSuite {
         val coordValues = coords.foldLeft(List[(Int, Int, Int)]()) { case (curList, (curX, curY)) =>
           (curX, curY, startSudoku.rows(curX)(curY).get) +: curList
         }
-        println(coordValues)
-        val sudoku = finishSudoku(startSudoku).get
+        assert(
+          finishSudoku(startSudoku) match {
+            case Some(sudoku) => isSudokuSolved(sudoku)
+            case None => false
+          }
+        )
+
       }
 
-      test("values"){
-
-        generateControlledSudokuTest(coords)
-
+      test("generatingSeveralSudokus"){
+        (0 to 100).foreach{ _ =>
+            generateControlledSudokuTest(coords)
+        }
       }
-      test("generating statistics are OK"){
+      test("generatingStatistics"){
         val numOfGen = 100
         val times = (1 to numOfGen).toList.map(i =>
           val startTime = System.nanoTime()
@@ -186,11 +176,27 @@ object ValidationTest extends TestSuite {
         )
         val avg = times.sum / numOfGen * Math.pow(10, -9)
         val max = times.max * Math.pow(10, -9)
-        val min = times.min
+        val min = times.min * Math.pow(10, -9)
         println(s"Times of generating Sudokus, AVG: $avg sec, MIN: $min sec, MAX: $max sec")
         assert(avg < 1)
         assert(max < 3)
       }
+    }
+
+    test("testSavingAndReading") {
+      def testSavingAndReading(path: Path, sudoku: Sudoku): Unit = {
+        save(sudoku, path)
+        println("sudoku saved")
+        Files.exists(path) ==> true
+        load(path) ==> sudoku
+        Files.delete(path)
+        println("sudoku deleted")
+      }
+
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
+
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
+      testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }
   }
 }
