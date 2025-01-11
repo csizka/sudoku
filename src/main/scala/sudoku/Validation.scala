@@ -58,7 +58,7 @@ object Validation {
     getAllColumns(sudoku).forall(areCellsSolved)
   }
 
-  def nthBlockCoords(sudoku: Sudoku, n: Int): Vector[(Int, Int)] = {
+  def nthBlockCoords(sudoku: Sudoku, n: Int): Vector[Coord] = {
     if ( 0 <= n && n <= 8) {
       val fstXCoord = n / 3 * 3
       val fstYCoord = n % 3 * 3

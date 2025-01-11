@@ -15,7 +15,7 @@ import java.nio.file.{Files, Path, Paths}
 import scala.language.postfixOps
 import scala.util.Random
 
-object ValidationTest extends TestSuite {
+object ValidationTests extends TestSuite {
   val tests = Tests {
     test("validation") {
       test("areCellsSolved") {
@@ -194,7 +194,6 @@ object ValidationTest extends TestSuite {
       }
 
       testSavingAndReading(Paths.get("./testThenDelete.txt"), notGoodSudoku)
-
       testSavingAndReading(Paths.get("./testThenDelete.txt"), partiallySolvedGoodSudoku)
       testSavingAndReading(Paths.get("./testThenDelete.txt"), testingSudoku)
     }

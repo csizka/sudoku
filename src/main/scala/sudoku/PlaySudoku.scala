@@ -26,7 +26,7 @@ object PlaySudoku {
     sudoku.rows(row)(column).isEmpty
   }
 
-  def definedCells(sudoku: Sudoku): Map[Int, Vector[(Int, Int)]] = {
+  def definedCells(sudoku: Sudoku): Map[Int, Vector[Coord]] = {
     val coords = for {
       rowIx <- 0 to 8
       colIx <- 0 to 8
@@ -37,38 +37,36 @@ object PlaySudoku {
       .groupBy { case (rowIx, colIx) => sudoku.rows(rowIx)(colIx).get}
   }
 
+  def getRepetitiveCoords(valCoordPairs: Vector[(Int, Coord)]): Vector[Coord] = {
+    valCoordPairs
+      .groupMap(_._1)(_._2)
+      .filter(_._2.size > 1)
+      .values
+      .toVector
+      .flatten
+  }
+
   def nthRowRepetitiveCoords(rowIx: Int, sudoku: Sudoku): Vector[Coord]  = {
-    (0 to 8)
+    val valCoordPairs = (0 to 8)
       .toVector
       .flatMap(colIx => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
-      .groupMap(_._1)(_._2)
-      .filter(_._2.size > 1)
-      .values
-      .toVector
-      .flatten
+    getRepetitiveCoords(valCoordPairs)
   }
 
-  def nthColRepetitiveCoords(colIx: Int, sudoku: Sudoku): Vector[(Int, Int)] = {
-    {0 to 8}
+  def nthColRepetitiveCoords(colIx: Int, sudoku: Sudoku): Vector[Coord] = {
+    val valCoordPairs = {0 to 8}
       .toVector
       .flatMap(rowIx => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
-      .groupMap(_._1)(_._2)
-      .filter(_._2.size > 1)
-      .values
-      .toVector
-      .flatten
+    getRepetitiveCoords(valCoordPairs)
   }
 
-  def nthBlockRepetitiveCoords(blockIx: Int, sudoku: Sudoku): Vector[(Int, Int)] = {
-    nthBlockCoords(sudoku, blockIx).flatMap((rowIx, colIx) => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
-      .groupMap(_._1)(_._2)
-      .filter(_._2.size > 1)
-      .values
-      .toVector
-      .flatten
+  def nthBlockRepetitiveCoords(blockIx: Int, sudoku: Sudoku): Vector[Coord] = {
+    val valCoordPairs = nthBlockCoords(sudoku, blockIx)
+      .flatMap((rowIx, colIx) => sudoku.rows(rowIx)(colIx).map(v => v -> (rowIx, colIx)))
+    getRepetitiveCoords(valCoordPairs)
   }
 
-  def allRepetitiveCoords(sudoku: Sudoku): Vector[(Int, Int)] = {
+  def allRepetitiveCoords(sudoku: Sudoku): Vector[Coord] = {
     {0 to 8}
       .toVector
       .flatMap { index =>

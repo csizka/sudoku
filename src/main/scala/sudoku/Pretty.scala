@@ -3,10 +3,10 @@ package sudoku
 
 object Pretty {
   
-  val firstRowPretty: String =  " ╔═1═╤═2═╤═3═╦═4═╤═5═╤═6═╦═7═╤═8═╤═9═╗ "
-  val singleRowPretty: String = " ╟───┼───┼───╫───┼───┼───╫───┼───┼───╢ "
-  val doubleRowPretty: String = " ╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣ "
-  val lastRowPretty: String =   " ╚═1═╧═2═╧═3═╩═4═╧═5═╧═6═╩═7═╧═8═╧═9═╝ "
+  val firstRowPretty =  " ╔═1═╤═2═╤═3═╦═4═╤═5═╤═6═╦═7═╤═8═╤═9═╗ "
+  val singleRowPretty = " ╟───┼───┼───╫───┼───┼───╫───┼───┼───╢ "
+  val doubleRowPretty = " ╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣ "
+  val lastRowPretty =   " ╚═1═╧═2═╧═3═╩═4═╧═5═╧═6═╩═7═╧═8═╧═9═╝ "
 
 
   def prettyCell(cell: Cell): String = cell match {

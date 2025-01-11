@@ -18,7 +18,7 @@ object Generate {
     finishSudoku(startSudoku).get
   }
 
-  def generateControlledSudoku(coords: Vector[(Int, Int)]): Sudoku = {
+  def generateControlledSudoku(coords: Vector[Coord]): Sudoku = {
     val startSudoku = coords.foldLeft(emptySudoku) { case (curSudoku, (rowIx, colIx)) =>
       curSudoku.insert(rowIx, colIx, rand.nextInt(9) + 1)
     }
